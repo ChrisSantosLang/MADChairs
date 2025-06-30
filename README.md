@@ -13,7 +13,7 @@ Some constants you can change easily in `MADChairs/__init__.py`:
 * TIMER_INCREMENT: How many more seconds to allow when players request extra time
 
 Some specal data columns of note:
-* participant.skill_rating: The participant's [trueskill[(https://trueskill.org/) rating at the end of the game
+* participant.skill_rating: The participant's [trueskill](https://trueskill.org/) rating at the end of the game
 * participant.disconnected: "1" if the participant was disconnected
 * participant.payoff: The participant's total winnings across all rounds.
 * MADChairs.{round}.player.selection: What the player selected in that {round}
