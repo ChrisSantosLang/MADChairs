@@ -22,3 +22,8 @@ Some specal data columns of note:
 * MADChairs.{round}.player.timedOut: "1" is the player timed-out so selection was randomized in that {round}
 * MADChairs.{round}.player.debt: The change in that {round} in favors owed to the other players
 * MADChairs.{round}.player.skill_estimate: The player's estimated skill based on peformance in that and previous {rounds}
+
+You may want to use
+* [oTree hub](https://www.otreehub.com/)
+* [oTree HR](https://hr.otreehub.com/)
+* [Heroku dashboard](https://dashboard.heroku.com/apps)
