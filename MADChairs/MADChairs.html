@@ -1,0 +1,69 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Let's play a game...{{ endblock }}
+
+{{ block content }}
+
+<style>
+    .otree-timer {
+        display: none;
+    }
+</style>
+<p>
+    Click a button (any player who clicks a button no other player clicks wins {{ C.PRIZE }}):
+</p>
+<table><tr>
+    <td><button class="btn btn-primary" onclick="sendValue('A')">&nbsp;A&nbsp;</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td><button class="btn btn-primary" onclick="sendValue('B')">&nbsp;B&nbsp;</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td><button class="btn btn-primary" onclick="sendValue('C')">&nbsp;C&nbsp;</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td><button class="btn btn-primary" onclick="sendValue('D')">&nbsp;D&nbsp;</button></td>
+</tr></table>
+<br>
+<div id="extension" style="display: none">
+    Time remaining: <span id="displayedTimer"></span> seconds <span id="timerResetLink">(<a href="javascript:;" onclick="extendTime()">add 30 more seconds</a>)</span>
+</div>
+<br>
+<p>
+    <b>Recent History:</b>
+</p>
+<table id="historyTable"></table>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+function liveRecv(data) {
+    if (data === 'selection_made') {
+        document.getElementById("form").submit();
+    }
+}
+
+function sendValue(value) {
+    liveSend({'selected': value});
+}
+
+function extendTime() {
+    js_vars.timer_buffer = Math.max(0, js_vars.timer_buffer - js_vars.TIMER_INCREMENT);
+    $('#extension').hide();
+}
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
+    js_vars.timer_buffer = js_vars.BUFFER_INIT;
+    $('.otree-timer__time-left').on('update.countdown', function (event) {
+        let time = event.offset.totalSeconds - js_vars.timer_buffer;
+        if (time < 1) {
+            liveSend({'timeout': event.offset.totalSeconds});
+        } else if (time <= js_vars.TIMER_DISPLAY_AT) {
+            $('#displayedTimer').text(time);
+            if (time === js_vars.TIMER_DISPLAY_AT) {
+                if (js_vars.timer_buffer < 1) $('#timerResetLink').hide();
+                $('#extension').show();
+            }
+        }
+    });
+});
+</script>
+{{ endblock }}
