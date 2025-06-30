@@ -1,7 +1,7 @@
 # MADChairs
 Code for an [oTree](https://otree.readthedocs.io/en/latest/index.html) server to play the [MAD Chairs game](https://arxiv.org/abs/2503.20986)
 
-Some constants you can change easily in MADChairs/__init__.py:
+Some constants you can change easily in `MADChairs/__init__.py`:
 * PLAYERS_PER_GROUP: The number of players (should be at least 5 for four buttons)
 * NUM_ROUNDS: How many rounds to repeat the game
 * MAX_HISTORY_DISPLAY: Display this many round of previous history 
