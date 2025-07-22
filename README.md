@@ -20,7 +20,7 @@ Some specal data columns of note:
 * MADChairs.{round}.player.secondsElapsed: How many seconds the player took to make their selection in that {round}
 * MADChairs.{round}.player.payoff: How much the player won in that {round}
 * MADChairs.{round}.player.timedOut: "1" is the player timed-out so selection was randomized in that {round}
-* MADChairs.{round}.player.debt: The change in that {round} in favors owed to the other players
+* MADChairs.{round}.player.debt: Cumulative debt of favors owed to other players from the first round until that {round}
 * MADChairs.{round}.player.skill_estimate: The player's estimated skill based on peformance in that and previous {rounds}
 
 You may want to use
