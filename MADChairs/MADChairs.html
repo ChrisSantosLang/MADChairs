@@ -8,6 +8,7 @@
         display: none;
     }
 </style>
+<p><b><u>Round {{group.round_number}}</u></b></p>
 <p>
     Click a button (any player who clicks a button no other player clicks wins {{ C.PRIZE }}):
 </p>
@@ -25,9 +26,6 @@
     Time remaining: <span id="displayedTimer"></span> seconds <span id="timerResetLink">(<a href="javascript:;" onclick="extendTime()">add 30 more seconds</a>)</span>
 </div>
 <br>
-<p>
-    <b>Recent History:</b>
-</p>
 <table id="historyTable"></table>
 
 {{ endblock }}

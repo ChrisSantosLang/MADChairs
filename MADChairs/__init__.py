@@ -33,6 +33,8 @@ def set_payoffs(group: Group):
             winners.append(1)
     for me in players:
         myRating = me.participant.skill_rating 
+        if len(me.in_previous_rounds()) > 0:
+            me.debt = me.in_previous_rounds()[-1].debt
         for other in players:
             if me.id_in_group != other.id_in_group:
                 otherRating = other.participant.skill_rating 
@@ -81,25 +83,30 @@ class MADChairs(Page):
         group = player.group
         participant = player.participant
         import time
-        historyHTML = []
+        historyHTML = ["<tr>"]
         players = group.get_players()
+        if len(players[0].in_previous_rounds()) > 0:
+            historyHTML.extend(["<td style='width: 110pt'><b>Previous rounds:</b></td>"])
+            for hist in players[0].in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
+                historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", str(hist.round_number), "</b></td>"])
+        historyHTML.append("</tr>")
         for p in players:
             p.participant.time = time.time()
             if p.id_in_group == player.id_in_group:
-                historyHTML.extend(["<tr><td style='width: 80pt'><b>", C.PLAYER_LABELS[p.id_in_group-1], " (Me)</b></td>"])
+                historyHTML.extend(["<tr><td style='width: 110pt'><b>", C.PLAYER_LABELS[p.id_in_group-1], " (Me)</b></td>"])
             else:
-                historyHTML.extend(["<tr><td style='width: 80pt'>", C.PLAYER_LABELS[p.id_in_group-1], "</td>"])
+                historyHTML.extend(["<tr><td style='width: 110pt'>", C.PLAYER_LABELS[p.id_in_group-1], "</td>"])
             for hist in p.in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
                 if p.id_in_group == player.id_in_group:
                     if hist.payoff > 0:
-                        historyHTML.extend(["<td style='width: 16pt; text-align: center;'><b>", hist.selection, "</b></td>"])
+                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", hist.selection, "</b></td>"])
                     else:
-                        historyHTML.extend(["<td style='width: 16pt; text-align: center;'><b>(", hist.selection, ")</b></td>"])
+                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>(", hist.selection, ")</b></td>"])
                 else:
                     if hist.payoff > 0:
-                        historyHTML.extend(["<td style='width: 16pt; text-align: center;'>", hist.selection, "</td>"])
+                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'>", hist.selection, "</td>"])
                     else:
-                        historyHTML.extend(["<td style='width: 16pt; text-align: center;'>(", hist.selection, ")</td>"])
+                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'>(", hist.selection, ")</td>"])
             total_payoff = sum([hist.payoff for hist in p.in_previous_rounds()])
             if p.id_in_group == player.id_in_group:
                 historyHTML.extend(["<td style='width: 60pt'><b>", str(total_payoff), "</b></td>"])
