@@ -13,17 +13,22 @@
     Click a button (any player who clicks a button no other player clicks wins {{ C.PRIZE }}):
 </p>
 <table><tr>
-    <td><button class="btn btn-primary" onclick="sendValue('A')">&nbsp;A&nbsp;</button>
+    <td><button id="A" class="btn btn-primary">&nbsp;A&nbsp;</button>
         &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button class="btn btn-primary" onclick="sendValue('B')">&nbsp;B&nbsp;</button>
+    <td><button id="B" class="btn btn-primary">&nbsp;B&nbsp;</button>
         &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button class="btn btn-primary" onclick="sendValue('C')">&nbsp;C&nbsp;</button>
+    <td><button id="C" class="btn btn-primary">&nbsp;C&nbsp;</button>
         &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button class="btn btn-primary" onclick="sendValue('D')">&nbsp;D&nbsp;</button></td>
+    <td><button id="D" class="btn btn-primary">&nbsp;D&nbsp;</button></td>
 </tr></table>
+<div id="check" style="display: none"><br>&nbsp;&nbsp;&nbsp;&nbsp;
+    You clicked <b><span id="selection"></span></b>. &nbsp;&nbsp;&nbsp;
+    <button id="confirm" class="btn btn-primary">Confirm</button> &nbsp;&nbsp;&nbsp;
+    <button id="cancel" class="btn btn-primary">Cancel</button>
+</div>
 <br>
 <div id="extension" style="display: none">
-    Time remaining: <span id="displayedTimer"></span> seconds <span id="timerResetLink">(<a href="javascript:;" onclick="extendTime()">add 30 more seconds</a>)</span>
+    Time remaining: <span id="displayedTimer"></span> seconds <span id="timerResetLink">(<a href="javascript:;" onclick="extendTime()">add 30 more seconds</a>). If time runs out, then you will not be paid for this round.</span>
 </div>
 <br>
 <table id="historyTable"></table>
@@ -38,10 +43,6 @@ function liveRecv(data) {
     }
 }
 
-function sendValue(value) {
-    liveSend({'selected': value});
-}
-
 function extendTime() {
     js_vars.timer_buffer = Math.max(0, js_vars.timer_buffer - js_vars.TIMER_INCREMENT);
     $('#extension').hide();
@@ -50,6 +51,34 @@ function extendTime() {
 document.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
     js_vars.timer_buffer = js_vars.BUFFER_INIT;
+    $('#A').on('click', function (event) {
+        $('#selection').text('A');
+        $('#check').show();
+        event.preventDefault();
+    });
+    $('#B').on('click', function (event) {
+        $('#selection').text('B');
+        $('#check').show();
+        event.preventDefault();
+    });
+    $('#C').on('click', function (event) {
+        $('#selection').text('C');
+        $('#check').show();
+        event.preventDefault();
+    });
+    $('#D').on('click', function (event) {
+        $('#selection').text('D');
+        $('#check').show();
+        event.preventDefault();
+    });
+    $('#confirm').on('click', function (event) {
+        liveSend({'selected': $('#selection').text()});
+        event.preventDefault();
+    });
+    $('#cancel').on('click', function (event) {
+        $('#check').hide();
+        event.preventDefault();
+    });
     $('.otree-timer__time-left').on('update.countdown', function (event) {
         let time = event.offset.totalSeconds - js_vars.timer_buffer;
         if (time < 1) {

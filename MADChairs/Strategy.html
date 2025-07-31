@@ -1,0 +1,27 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Before we finish the game...{{ endblock }}
+
+{{ block content }}
+
+<style>
+    .otree-timer {
+        display: none;
+    }
+</style>
+{{ formfields }}
+
+Time remaining: <span id="displayedTimer"></span> seconds. 
+<br><br>
+{{ next_button }}
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+document.addEventListener("DOMContentLoaded", function (event) {
+    $('.otree-timer__time-left').on('update.countdown', function (event) {
+        $('#displayedTimer').text(event.offset.totalSeconds);
+    });
+});
+</script>
+{{ endblock }}

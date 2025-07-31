@@ -1,0 +1,13 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Thank you!{{ endblock }}
+
+{{ block content }}
+
+Your Earnings from Today is {{ total }}. 
+
+This the sum of your participation fee and bonus as follows: Participation fee is $4.00.
+Your button choices in {{ wins }} rounds were unique and no other participants in your group chose them. So, you earned a {{ participant.payoff }} bonus. 
+<br><br>
+{{ next_button }}
+
+{{ endblock }}

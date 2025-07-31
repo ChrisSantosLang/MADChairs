@@ -12,9 +12,10 @@ class C(BaseConstants):
     MAX_TIME = 120
     MAX_HISTORY_DISPLAY = 8
     PLAYER_LABELS = ('Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5')
-    PRIZE = cu(0.4)
+    PRIZE = cu(0.2)
     BUTTONS = ('A', 'B', 'C', 'D')
     TIMER_DISPLAY_AT = 30
+    QUESTION_TIMER = 120
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
@@ -26,7 +27,7 @@ def set_payoffs(group: Group):
     selections = [p.selection for p in players]
     winners = []
     for p in players:
-        if selections.count(p.selection) == 1 and p.selection in C.BUTTONS:
+        if selections.count(p.selection) == 1 and p.selection in C.BUTTONS and not p.timedOut:
             p.payoff = C.PRIZE
             winners.append(0)
         else:
@@ -59,24 +60,22 @@ class Player(BasePlayer):
     secondsElapsed = models.FloatField()
     skill_estimate = models.FloatField(blank=True)
     debt = models.FloatField(initial=0)
+    strategy = models.LongStringField(label='What were your strategies for the first two rounds of the game?')
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant
     import time
-    player.participant.disconnected = False
+    participant.disconnected = False
+    player.secondsElapsed = time.time() - participant.time
     if "selected" in data and data["selected"] in C.BUTTONS:
-        player.secondsElapsed = time.time() - player.participant.time
         player.selection = data["selected"]
-        return {player.id_in_group: "selection_made"}
-    if "timeout" in data:
+    elif "timeout" in data:
         import random
         player.timedOut = True
-        player.secondsElapsed = time.time() - player.participant.time
         player.selection = random.choice(C.BUTTONS)
-        return {player.id_in_group: "selection_made"}
+    return {player.id_in_group: "selection_made"}
 class MADChairs(Page):
     form_model = 'player'
-    timer_text = 'Time left to make selection'
     live_method = 'live_update'
     @staticmethod
     def js_vars(player: Player):
@@ -97,16 +96,12 @@ class MADChairs(Page):
             else:
                 historyHTML.extend(["<tr><td style='width: 110pt'>", C.PLAYER_LABELS[p.id_in_group-1], "</td>"])
             for hist in p.in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
+                selection = [hist.selection]
+                if [p.in_round(hist.round_number).selection for p in players].count(hist.selection) > 1:
+                    selection = ["("] + selection + [")"]      
                 if p.id_in_group == player.id_in_group:
-                    if hist.payoff > 0:
-                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", hist.selection, "</b></td>"])
-                    else:
-                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>(", hist.selection, ")</b></td>"])
-                else:
-                    if hist.payoff > 0:
-                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'>", hist.selection, "</td>"])
-                    else:
-                        historyHTML.extend(["<td style='width: 20pt; text-align: center;'>(", hist.selection, ")</td>"])
+                    selection = ["<b>"] + selection + ["</b>"]
+                historyHTML.extend(["<td style='width: 20pt; text-align: center;'>"] + selection + ["</td>"])
             total_payoff = sum([hist.payoff for hist in p.in_previous_rounds()])
             if p.id_in_group == player.id_in_group:
                 historyHTML.extend(["<td style='width: 60pt'><b>", str(total_payoff), "</b></td>"])
@@ -136,6 +131,16 @@ class MADChairs(Page):
         else:
             participant.disconnected = True
             return C.MAX_TIME
+class Strategy(Page):
+    form_model = 'player'
+    form_fields = ['strategy']
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return player.round_number == 2 and not participant.disconnected
+    @staticmethod
+    def get_timeout_seconds(player: Player):
+        return C.QUESTION_TIMER
 class MADChairsWaitPage(WaitPage):
     after_all_players_arrive = set_payoffs
-page_sequence = [MADChairs, MADChairsWaitPage]
+page_sequence = [MADChairs, Strategy, MADChairsWaitPage]
