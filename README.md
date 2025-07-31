@@ -11,6 +11,7 @@ Some constants you can change easily in `MADChairs/__init__.py`:
 * BUFFER_INIT: How many seconds to remove from MAX_TIME if players to not request extra time
 * TIMER_DISPLAY_AT: Allow players to request extra time when this many seconds remain
 * TIMER_INCREMENT: How many more seconds to allow when players request extra time
+* QUESTION_TIMER: How many seconds to allow for the question after round 2
 
 Some specal data columns of note:
 * participant.skill_rating: The participant's [trueskill](https://trueskill.org/) rating at the end of the game
@@ -22,6 +23,7 @@ Some specal data columns of note:
 * MADChairs.{round}.player.timedOut: "1" is the player timed-out so selection was randomized in that {round}
 * MADChairs.{round}.player.debt: Cumulative debt of favors owed to other players from the first round until that {round}
 * MADChairs.{round}.player.skill_estimate: The player's estimated skill based on peformance in that and previous {rounds}
+* MADChairs.{round}.player.strategy: The player's description of their strategy
 
 You may want to use
 * [oTree hub](https://www.otreehub.com/)
