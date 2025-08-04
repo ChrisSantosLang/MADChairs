@@ -5,7 +5,7 @@ c = cu
 doc = ''
 class C(BaseConstants):
     NAME_IN_URL = 'MADChairs'
-    PLAYERS_PER_GROUP = 3
+    PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 4
     BUFFER_INIT = 60
     TIMER_INCREMENT = 30
@@ -60,7 +60,7 @@ class Player(BasePlayer):
     secondsElapsed = models.FloatField()
     skill_estimate = models.FloatField(blank=True)
     debt = models.FloatField(initial=0)
-    strategy = models.LongStringField(label='What were your strategies for the first two rounds of the game?')
+    strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant

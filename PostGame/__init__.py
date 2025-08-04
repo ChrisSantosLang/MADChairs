@@ -13,9 +13,9 @@ class Group(BaseGroup):
     pass
 class Player(BasePlayer):
     perceived_aim = models.LongStringField(label='What do you think this experiment was about? ')
-    final_strategy = models.LongStringField(label='What were your strategies in the game?  (If you had different strategies, please briefly describe them). ')
-    instruction_difficulty = models.IntegerField(choices=[[0, '0 (Very easy)'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, '10 (Very difficult)']], label='How difficult were the instructions of the game?', max=10, min=0, widget=widgets.RadioSelectHorizontal)
-    risk_proclivity = models.IntegerField(choices=[[0, '0 (Not willing at all)'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, '10 (Very willing)']], label='Please tell us, in general, how willing or unwilling are you to take risks', max=10, min=0, widget=widgets.RadioSelectHorizontal)
+    final_strategy = models.LongStringField(label='Considering the final rounds, explain briefly the thoughts behind your choices: ')
+    instruction_difficulty = models.IntegerField(choices=[[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, '10']], label='How hard were the instructions of the game? (0 = Not hard at all, 10 = Very hard)', max=10, min=0, widget=widgets.RadioSelectHorizontal)
+    risk_proclivity = models.IntegerField(choices=[[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, '10']], label='Please tell us, in general, how willing or unwilling are you to take risks. (0 = Not willing at all, 10 = Very willing)', max=10, min=0, widget=widgets.RadioSelectHorizontal)
 class Results(Page):
     form_model = 'player'
     @staticmethod
@@ -52,6 +52,8 @@ class End(Page):
     @staticmethod
     def vars_for_template(player: Player):
         participant = player.participant
+        participant.finished = True
+        session.prolific_completion_url = environ.get('OTREE_COMPLETION_URL') 
         return dict(
             total=participant.payoff + 4,
             wins=int(participant.payoff / 0.2),
