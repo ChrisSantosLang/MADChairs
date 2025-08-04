@@ -54,9 +54,9 @@ class End(Page):
         participant = player.participant
         from os import environ
         participant.finished = True
-        session.prolific_completion_url = environ.get('OTREE_COMPLETION_URL') 
         return dict(
             total=participant.payoff + 4,
             wins=int(participant.payoff / 0.2),
+            completion_url=environ.get('OTREE_COMPLETION_URL'), 
         )
 page_sequence = [Results, Page1, Page2, Page3, End]
