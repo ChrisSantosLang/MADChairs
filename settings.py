@@ -5,8 +5,8 @@ LANGUAGE_CODE = 'en'
 REAL_WORLD_CURRENCY_CODE = 'USD'
 USE_POINTS = False
 DEMO_PAGE_INTRO_HTML = ''
-PARTICIPANT_FIELDS = ['time', 'skill_rating', 'disconnected']
-SESSION_FIELDS = []
+PARTICIPANT_FIELDS = ['time', 'skill_rating', 'disconnected', 'finished']
+SESSION_FIELDS = ['prolific_completion_url']
 ROOMS = []
 
 ADMIN_USERNAME = 'admin'
