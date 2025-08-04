@@ -52,6 +52,7 @@ class End(Page):
     @staticmethod
     def vars_for_template(player: Player):
         participant = player.participant
+        from os import environ
         participant.finished = True
         session.prolific_completion_url = environ.get('OTREE_COMPLETION_URL') 
         return dict(
