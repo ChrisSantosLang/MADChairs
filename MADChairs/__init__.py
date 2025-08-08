@@ -88,7 +88,7 @@ class MADChairs(Page):
             historyHTML.extend(["<td style='width: 110pt'><b>Previous rounds:</b></td>"])
             for hist in players[0].in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
                 historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", str(hist.round_number), "</b></td>"])
-            historyHTML.extend(["<td><b>Bonus</b></td>"])
+            historyHTML.extend(["<td style='width: 110pt;'><b>Bonus</b></td>"])
         historyHTML.append("</tr>")
         for p in players:
             p.participant.time = time.time()
@@ -102,8 +102,13 @@ class MADChairs(Page):
                     selection = ["("] + selection + [")"]      
                 if p.id_in_group == player.id_in_group:
                     selection = ["<b>"] + selection + ["</b>"]
+                if hist.timedOut:
+                    selection = ["<i>"] + selection + ["</i>"]
                 historyHTML.extend(["<td style='width: 20pt; text-align: center;'>"] + selection + ["</td>"])
+            timeouts = sum([int(hist.timedOut) for hist in p.in_previous_rounds()])
             total_payoff = sum([hist.payoff for hist in p.in_previous_rounds()])
+            if timeouts > 0:
+                total_payoff = "".join([str(total_payoff), "<i> (", str(timeouts), " timeouts)</i>"])
             if p.id_in_group == player.id_in_group:
                 historyHTML.extend(["<td style='width: 60pt'><b>", str(total_payoff), "</b></td>"])
             else:

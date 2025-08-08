@@ -10,7 +10,7 @@
     You will play the game in groups of 5 players. The 4 players that join your group will stay the same over     all rounds that you play.
 </p>
 <p>
-    In each round, you will choose one of 4 buttons, labeled A, B, C, and D. You can earn 0.25&pound; additional bonus if no other player chooses the button you chose. However, you do not earn any bonus if one or more other participants in your group also chooses the button you chose in that round.
+    In each round, you will choose one of 4 buttons, labeled A, B, C, and D. You can earn <b>0.25&pound;</b> additional bonus if <b>no other player</b> chooses the button you chose. However, you <b>do not earn</b> any bonus if <b>one or more other participants</b> in your group also chooses the button you chose in that round.
 </p>
 <p>
     Every player will be given a unique player number, which stays the same over all rounds. As you complete     rounds, you will see the choice history of the last 8 rounds and accumulated earnings of all players.
@@ -41,7 +41,9 @@
 <p>
     This information is provided to help you track patterns and performance within your group as the game         progresses.
 </p>
-
+<br>
+<br>
+<br>
 <div id="Q1">
     <b>Based on the example you have just read, if the players click the following buttons, which players         would add 0.25&pound; to their bonus payment?</b>
     <br><br>
@@ -73,12 +75,20 @@
             None of the above
         </button></td></tr>
     </table>  
+    <div id="Q1check" style="display: none"><br>&nbsp;&nbsp;&nbsp;&nbsp;
+        You clicked "<b><span id="Q1selection"></span></b>". &nbsp;&nbsp;&nbsp;
+        <button id="Q1confirm" class="btn btn-primary">Confirm</button> &nbsp;&nbsp;&nbsp;
+        <button id="Q1cancel" class="btn btn-primary">Cancel</button>
+    </div>
 </div>
 
+
 <div id="Q1Correct" style="display: none">
-    <b>That is correct!</b><br>    
-    <br>    
-    <b>Based on the example you have just read, what would the accumulated bonuses of the players be in the        following example?</b><br>
+    <b>Your answer to the first question was correct!</b><br>    
+    <br>  
+    <br>
+    <b>Final question: Based on the example you have just read, what would the accumulated bonuses of the 
+        players be in the following example?</b><br>
     <br>
     <img src="https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Q2.png?raw=true">
     <br><br>
@@ -86,31 +96,37 @@
     <br><br><table>
         <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td><button id="2A" class="btn btn-primary" style="width: 100%;">
-            0.25&pound; for Player 1, 0.25&pound; for Player 2, 0.25&pound; for Player 3 (Me), 0.50&pound; for Player 4, and 0.25&pound; for Player 5;
+            0.25&pound;, 0.25&pound;, 0.25&pound;, 0.50&pound;, and 0.25&pound;, respectively
         </button></td></tr>
         <tr><td></td><td><button id="2B" class="btn btn-primary" style="width: 100%;">
-            0.25&pound; for Player 1, 0.00&pound; for Player 2, 0.25&pound; for Player 3 (Me), 0.50&pound; for Player 4, and 0.25&pound; for Player 5;
+            0.25&pound;, 0.00&pound;, 0.25&pound;, 0.50&pound;, and 0.25&pound;, respectively
         </button></td></tr>
         <tr><td></td><td><button id="2C" class="btn btn-primary" style="width: 100%;">
-            0.00&pound; for Player 1, 0.25&pound; for Player 2, 0.50&pound; for Player 3 (Me), 0.00&pound; for Player 4, and 0.25&pound; for Player 5;
+            0.00&pound;, 0.25&pound;, 0.50&pound;, 0.00&pound;, and 0.25&pound;, respectively
         </button></td></tr>
         <tr><td></td><td><button id="2D" class="btn btn-primary" style="width: 100%;">
-            0.50&pound; for Player 1, 0.25&pound; for Player 2, 0.00&pound; for Player 3 (Me), 0.25&pound; for Player 4, and 0.25&pound; for Player 5;
+            0.50&pound;, 0.25&pound;, 0.00&pound;, 0.25&pound;, and 0.25&pound;, respectively
         </button></td></tr>
         <tr><td></td><td><button id="2E" class="btn btn-primary" style="width: 100%;">
             None of the above
         </button></td></tr>
     </table>  
+    <div id="Q2check" style="display: none"><br>&nbsp;&nbsp;&nbsp;&nbsp;
+        You clicked "<b><span id="Q2selection"></span></b>". &nbsp;&nbsp;&nbsp;
+        <button id="Q2confirm" class="btn btn-primary">Confirm</button> &nbsp;&nbsp;&nbsp;
+        <button id="Q2cancel" class="btn btn-primary">Cancel</button>
+    </div>
 </div>
 <div id="wrong" style="display: none">
     <br>
-    <b>That is not the correct answer. Please try again.  You will have only one more opportunity to get this     question correct. It may help to re-read the instructions above.</b>
+    <b>The first option you confirmed was not correct. You have one more chance to choose the correct option. If you are not sure, please re-read the instruction.</b>
 </div>
 <div id="fail" style="display: none">
     <b>You have not answered the question correctly. Please close this browser tab and click "Stop Without Completing" in Prolific.</b>
 </div>
 <div id="Q2Correct" style="display: none">
-    <b>You have answered both comprehension questions correctly.</b><br>
+    <b>You answered both comprehension questions correctly!</b><br>
+    <br>
     <br>
     Click "Next" below to enter the waiting room. The game will begin when five players have joined.<br>
     <br>
@@ -122,48 +138,61 @@
 
 {{ block scripts }}
 <script>
-function Q1wrong(event) {
-    if ($('#wrong').is(":visible")){
-        $('#Q1').hide();
-        $('#wrong').hide();
-    	$('#fail').show();
-    }else{
-      	$('#wrong').show();
-    }
+function Q1(event) {
+    $('#Q1selection').text(event.target.innerText);
+    $('#Q1check').show();
     event.preventDefault();
 }
-function Q2wrong(event) {
-    if ($('#wrong').is(":visible")){
-        $('#Q1Correct').hide();
-        $('#wrong').hide();
-    	$('#fail').show();
-    }else{
-      	$('#wrong').show();
-    }
+function Q2(event) {
+    $('#Q2selection').text(event.target.innerText);
+    $('#Q2check').show();
     event.preventDefault();
 }
 document.addEventListener("DOMContentLoaded", function (event) {
-    $('#1A').on('click', Q1wrong);
-    $('#1B').on('click', Q1wrong);
-    $('#1C').on('click', Q1wrong);
-    $('#1D').on('click', function (event) {
-        $('#Q1').hide();
-        $('#wrong').hide();
-    	$('#Q1Correct').show();
-        event.preventDefault();
+    $('#1A, #1B, #1C, #1D, #1E').on('click', Q1);
+    $('#Q1confirm').on('click', function (event) {
+        if ($('#Q1selection').text() == "Players 1, 3 and 4"){
+        	$('#Q1').hide();
+        	$('#wrong').hide();
+    		$('#Q1Correct').show();
+        } else {
+            if ($('#wrong').is(":visible")){
+                $('#Q1').hide();
+                $('#wrong').hide();
+                $('#fail').show();
+            } else {
+                $('#Q1check').hide();
+                $('#wrong').show();
+            }
+        }
+      	event.preventDefault();
     });
-    $('#1E').on('click', Q1wrong);
-    $('#2A').on('click', Q2wrong);
-    $('#2B').on('click', Q2wrong);
-    
-    $('#2C').on('click', function (event) {
-        $('#Q1Correct').hide();
-        $('#wrong').hide();
-    	$('#Q2Correct').show();
+    $('#Q1cancel').on('click', function (event) {
+        $('#Q1check').hide();
         event.preventDefault();
+    }); 
+    $('#2A, #2B, #2C, #2D, #2E').on('click', Q2);
+ 	$('#Q2confirm').on('click', function (event) {
+        if ($('#Q2selection').text().slice(0, 4) == "0.00"){
+        	$('#Q1Correct').hide();
+        	$('#wrong').hide();
+    		$('#Q2Correct').show();
+        } else {
+            if ($('#wrong').is(":visible")){
+                $('#Q1Correct').hide();
+                $('#wrong').hide();
+                $('#fail').show();
+            } else {
+                $('#Q2check').hide();
+                $('#wrong').show();
+            }
+        }
+      	event.preventDefault();
     });
-    $('#2D').on('click', Q2wrong);
-    $('#2E').on('click', Q2wrong);
+    $('#Q2cancel').on('click', function (event) {
+        $('#Q2check').hide();
+        event.preventDefault();
+    });                  
 });
 </script>
 {{ endblock }}
