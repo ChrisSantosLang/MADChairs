@@ -4,52 +4,46 @@
 {{ block content }}
 
 <p>
-    Welcome to the experiment. Please pay close attention to the instructions.
+    You will play 20 rounds of the same game. The basic payment is 3&pound;. On top of your basic payment,     you can accumulate a bonus payment over the course of the rounds. Your decisions and those of the other,     anonymous participants in the experiment will determine the sum of your money (a detailed explanation is     provided below).
 </p>
-<p>
-    You will play a number of rounds of the same game. The basic payment is $4. On top of your basic payment,     you can accumulate a bonus payment over the course of the rounds. Your decisions and those of the other,     anonymous participants in the experiment will determine the sum of your money (a detailed explanation is     provided below).
-    </p>
 <p>
     You will play the game in groups of 5 players. The 4 players that join your group will stay the same over     all rounds that you play.
 </p>
 <p>
-    In each round, you will choose one of 4 buttons, labeled A, B, C, and D. You can earn $0.25 additional       bonus if no other player chooses the button you chose. However, you do not earn any bonus if one or more     other participants in your group also chose the button you chose in this round.
+    In each round, you will choose one of 4 buttons, labeled A, B, C, and D. You can earn 0.25&pound; additional bonus if no other player chooses the button you chose. However, you do not earn any bonus if one or more other participants in your group also chooses the button you chose in that round.
 </p>
 <p>
     Every player will be given a unique player number, which stays the same over all rounds. As you complete     rounds, you will see the choice history of the last 8 rounds and accumulated earnings of all players.
 </p>
 <p>
-    For each choice, you have 60 seconds, which you can extend a maximum of twice by 30 seconds. The total       possible time per choice is 120 seconds. If you do not make a choice in that time, the computer will make     a random choice for you.
+    For each choice, you have 60 seconds, which you can extend a maximum of twice by 30 seconds. The total       possible time per choice is 120 seconds. If you do not make a choice in that time, the computer will make     a random choice for you and you will not receive any bonus payment for that round.
 </p>
 <p>
-    You will play up to 20 rounds or up to 30 minutes after the invited time, whichever occurs first.
+    To help you understand how the game works, here is an example from Round 3:
 </p>
-<p>
-    To help you understand how the game works, here is an example from Round 10
-</p>
-<img src="pic_trulli.jpg">
+<img src="https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Screenshot.png?raw=true">
 <br><br>
 <ul>
-  <li>On this page, you will see a task with multiple buttons representing different choices (e.g., A, B, C, D).</li>
-  <li>When you click on a button, a new button will appear showing the option you selected.</li>
+  <li>On this page, you will see multiple buttons representing different choices (e.g., A, B, C, D).</li>
+  <li>When you click on a button, a new "confirm" button will appear.</li>
   <li>You can change your choice before confirming your choice.</li>
-  <li>You must confirm your choice to proceed to the next page (i.e., the next round).</li>
+  <li>You must confirm your choice to earn any bonus.</li>
 </ul>
 <p>
-    You can see a section called <b>Recent History</b>. This shows the choices made by all participants in       your group in the previous rounds, in order by player number. Some of them are in brackets, which means       they are selected by more than one person in that round.
+    You can see a section called <b>Previous rounds</b>. This shows the choices made by all participants in       your group in the previous rounds, in order by player number. Some of them are in parentheses, which means they were selected by more than one person in that round.
 </p>
 <p>
     In addition, an amount of money is shown next to each player. This reflects the accumulated bonus earned     by each player up to (but not including) the current round, which is round 3 now.
 </p>
 <p>
-    <i>Note: The Recent History panel always displays information for the last 8 completed rounds.</i>
+    <i>Note: The "Previous rounds" table always displays information for the last 8 completed rounds.</i>
 </p>
 <p>
     This information is provided to help you track patterns and performance within your group as the game         progresses.
 </p>
 
 <div id="Q1">
-    <b>Based on the example you have just read, if the players click the following buttons, which players         would add $0.20 to their bonus payment?</b>
+    <b>Based on the example you have just read, if the players click the following buttons, which players         would add 0.25&pound; to their bonus payment?</b>
     <br><br>
     <table>
         <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Player 1:</td><td style='text-align: center;'>D</td></tr>
@@ -86,22 +80,22 @@
     <br>    
     <b>Based on the example you have just read, what would the accumulated bonuses of the players be in the        following example?</b><br>
     <br>
-    <img src="pic_trulli.jpg">
+    <img src="https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Q2.png?raw=true">
     <br><br>
     <b><i>Please re-read the study instructions above if you are not sure. You will have two opportunities to     get this question correct.</i></b>
     <br><br><table>
         <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td><button id="2A" class="btn btn-primary" style="width: 100%;">
-            1: $0.20, 2: $0.20, 3: $0.20, 4: $0.40, 5: $0.20
+        <td><button id="2A" class="btn btn-primary" style="width: 100%;">
+            0.25&pound; for Player 1, 0.25&pound; for Player 2, 0.25&pound; for Player 3 (Me), 0.50&pound; for Player 4, and 0.25&pound; for Player 5;
         </button></td></tr>
         <tr><td></td><td><button id="2B" class="btn btn-primary" style="width: 100%;">
-            1: $0.20, 2: $0.20, 3: $0.20, 4: $0.40, 5: $0.20
+            0.25&pound; for Player 1, 0.00&pound; for Player 2, 0.25&pound; for Player 3 (Me), 0.50&pound; for Player 4, and 0.25&pound; for Player 5;
         </button></td></tr>
         <tr><td></td><td><button id="2C" class="btn btn-primary" style="width: 100%;">
-            1: $0.20, 2: $0.20, 3: $0.20, 4: $0.40, 5: $0.20
+            0.00&pound; for Player 1, 0.25&pound; for Player 2, 0.50&pound; for Player 3 (Me), 0.00&pound; for Player 4, and 0.25&pound; for Player 5;
         </button></td></tr>
         <tr><td></td><td><button id="2D" class="btn btn-primary" style="width: 100%;">
-            1: $0.20, 2: $0.20, 3: $0.20, 4: $0.40, 5: $0.20
+            0.50&pound; for Player 1, 0.25&pound; for Player 2, 0.00&pound; for Player 3 (Me), 0.25&pound; for Player 4, and 0.25&pound; for Player 5;
         </button></td></tr>
         <tr><td></td><td><button id="2E" class="btn btn-primary" style="width: 100%;">
             None of the above
@@ -109,10 +103,11 @@
     </table>  
 </div>
 <div id="wrong" style="display: none">
+    <br>
     <b>That is not the correct answer. Please try again.  You will have only one more opportunity to get this     question correct. It may help to re-read the instructions above.</b>
 </div>
 <div id="fail" style="display: none">
-    <b>You have not answered the correctly. Please close this browser tab and click "Stop Without Completing"     in Prolific.</b>
+    <b>You have not answered the question correctly. Please close this browser tab and click "Stop Without Completing" in Prolific.</b>
 </div>
 <div id="Q2Correct" style="display: none">
     <b>You have answered both comprehension questions correctly.</b><br>
@@ -160,14 +155,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
     $('#1E').on('click', Q1wrong);
     $('#2A').on('click', Q2wrong);
     $('#2B').on('click', Q2wrong);
-    $('#2C').on('click', Q2wrong);
-    $('#2D').on('click', Q2wrong);
-    $('#2E').on('click', function (event) {
+    
+    $('#2C').on('click', function (event) {
         $('#Q1Correct').hide();
         $('#wrong').hide();
     	$('#Q2Correct').show();
         event.preventDefault();
     });
+    $('#2D').on('click', Q2wrong);
+    $('#2E').on('click', Q2wrong);
 });
 </script>
 {{ endblock }}

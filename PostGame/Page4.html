@@ -1,0 +1,13 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Please answer the following:{{ endblock }}
+
+{{ block content }}
+
+The total bonus across all players in your group was {{ utility }}, which is {{ shortfall }} lower than
+it possibly could have been.<br>
+<br>
+{{ formfields }}
+
+{{ next_button }}
+
+{{ endblock }}

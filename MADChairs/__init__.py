@@ -5,17 +5,17 @@ c = cu
 doc = ''
 class C(BaseConstants):
     NAME_IN_URL = 'MADChairs'
-    PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 4
+    PLAYERS_PER_GROUP = 5
+    NUM_ROUNDS = 20
     BUFFER_INIT = 60
     TIMER_INCREMENT = 30
     MAX_TIME = 120
     MAX_HISTORY_DISPLAY = 8
     PLAYER_LABELS = ('Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5')
-    PRIZE = cu(0.2)
     BUTTONS = ('A', 'B', 'C', 'D')
     TIMER_DISPLAY_AT = 30
     QUESTION_TIMER = 120
+    PRIZE = cu(0.25)
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
@@ -88,6 +88,7 @@ class MADChairs(Page):
             historyHTML.extend(["<td style='width: 110pt'><b>Previous rounds:</b></td>"])
             for hist in players[0].in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
                 historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", str(hist.round_number), "</b></td>"])
+            historyHTML.extend(["<td><b>Bonus</b></td>"])
         historyHTML.append("</tr>")
         for p in players:
             p.participant.time = time.time()
