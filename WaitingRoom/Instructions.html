@@ -141,11 +141,13 @@
 function Q1(event) {
     $('#Q1selection').text(event.target.innerText);
     $('#Q1check').show();
+    window.scrollTo(0, document.body.scrollHeight);
     event.preventDefault();
 }
 function Q2(event) {
     $('#Q2selection').text(event.target.innerText);
     $('#Q2check').show();
+    window.scrollTo(0, document.body.scrollHeight);
     event.preventDefault();
 }
 document.addEventListener("DOMContentLoaded", function (event) {
