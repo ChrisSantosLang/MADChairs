@@ -5,7 +5,7 @@ c = cu
 doc = ''
 class C(BaseConstants):
     NAME_IN_URL = 'PostGame'
-    PLAYERS_PER_GROUP = 5
+    PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 1
 class Subsession(BaseSubsession):
     pass
@@ -96,9 +96,10 @@ class Page4(Page):
         return not participant.disconnected
     @staticmethod
     def vars_for_template(player: Player):
+        session = player.session
         group = player.group
         participant = player.participant
-        socialUtility = sum([p.participant.payoff for p in group.get_players()])
+        socialUtility = sum([p.participant.payoff for p in group.get_players() if p.participant.id_in_session in participant.ids_in_group])
         return dict(
             utility = socialUtility,
             shortfall = 15 - socialUtility,
@@ -118,9 +119,10 @@ class Page5(Page):
         return not participant.disconnected
     @staticmethod
     def vars_for_template(player: Player):
+        session = player.session
         group = player.group
         participant = player.participant
-        payoffs = [p.participant.payoff for p in group.get_players()]
+        payoffs = [p.participant.payoff for p in group.get_players() if p.participant.id_in_session in participant.ids_in_group]
         return dict(
             highest = max(payoffs),
             lowest = min(payoffs),

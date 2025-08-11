@@ -54,6 +54,13 @@ def set_payoffs(group: Group):
     for player_rating in zip(players, trueskill.rate([(p.participant.skill_rating,) for p in players], winners)):
         player_rating[0].participant.skill_rating = player_rating[1][0]
         player_rating[0].skill_estimate = player_rating[1][0].mu
+def record_wait_time(group: Group):
+    session = group.session
+    import time
+    ids_in_group = [p.participant.id_in_session for p in group.get_players()]
+    for p in group.get_players(): 
+        p.participant.ids_in_group = ids_in_group
+        p.participant.wait_seconds = time.time() - p.participant.time
 class Player(BasePlayer):
     selection = models.StringField(choices=[['A', 'A'], ['B', 'B'], ['C', 'C'], ['D', 'D'], ['skip', 'skip']])
     timedOut = models.BooleanField(initial=False)
@@ -74,6 +81,14 @@ def live_update(player: Player, data):
         player.timedOut = True
         player.selection = random.choice(C.BUTTONS)
     return {player.id_in_group: "selection_made"}
+class WaitingToBegin(WaitPage):
+    group_by_arrival_time = True
+    after_all_players_arrive = record_wait_time
+    title_text = 'Waiting for all five players to join...'
+    body_text = 'If you click on any other window or tab, you must click back here to be considered "available".'
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
 class MADChairs(Page):
     form_model = 'player'
     live_method = 'live_update'
@@ -149,4 +164,4 @@ class Strategy(Page):
         return C.QUESTION_TIMER
 class MADChairsWaitPage(WaitPage):
     after_all_players_arrive = set_payoffs
-page_sequence = [MADChairs, Strategy, MADChairsWaitPage]
+page_sequence = [WaitingToBegin, MADChairs, Strategy, MADChairsWaitPage]
