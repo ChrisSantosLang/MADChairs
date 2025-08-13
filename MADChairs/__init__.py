@@ -92,7 +92,7 @@ def group_by_arrival_time_method(subsession, waiting_players):
     for p in waiting_players:
         if waited_too_long(p):
             p.participant.disconnected = True
-            p.participant.waiting_too_long = True
+            p.participant.overwaited = True
             return [p]
 class WaitingToBegin(WaitPage):
     group_by_arrival_time = True
