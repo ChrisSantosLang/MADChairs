@@ -20,9 +20,9 @@ class Player(BasePlayer):
     survey_c_seconds = models.FloatField()
     survey_d_seconds = models.FloatField()
     survey_e_seconds = models.FloatField()
-    tokens_passed = models.StringField(choices=[['None', 'None, so I get 60£ and the other player gets 0£'], ['20', '20, so I get 40£ and the other player gets 40£'], ['30', '30, so I get 30£ and the other player gets 60£'], ['60', 'All 60, so I get 0£ and the other player gets 120£'], ['Other', 'An amount different from above']], label='Imagine you have 60 tokens to distribute between a player of your group and yourself. Imagine further that the token is worth 1£ to you and 2£ to the other player. How many tokens would you give the other player?', widget=widgets.RadioSelect)
+    tokens_passed = models.StringField(choices=[['None', 'None, so I get £60 and the other player gets £0'], ['20', '20, so I get £40 and the other player gets £40'], ['30', '30, so I get £30 and the other player gets £60'], ['60', 'All 60, so I get £0 and the other player gets 120£'], ['Other', 'An amount different from above']], label='Imagine you have 60 tokens to distribute between a player of your group and yourself. Imagine further that the token is worth 1£ to you and 2£ to the other player. How many tokens would you give the other player?', widget=widgets.RadioSelect)
     CRT2_1 = models.IntegerField(label='If you’re running a race and you pass the person in second place, what place are you in? (Enter the number)', min=0)
-    CRT_1 = models.CurrencyField(label='A bat and a ball cost 1.10£ in total. The bat costs 1.00£ more than the ball. How much does the ball cost? (Enter the number of £)', min=0)
+    CRT_1 = models.CurrencyField(label='A bat and a ball cost £1.10 in total. The bat costs £1.00 more than the ball. How much does the ball cost? (Enter the number of £)', min=0)
     CRT2_2 = models.IntegerField(label='A farmer had 15 sheep and all but 8 died. How many are left? (Enter the number of sheep)', min=0)
     CRT_2 = models.FloatField(label='If it takes 5 machines 5 minutes to make 5 widgets, how long would it take 100 machines to make 100 widgets? (Enter the number of minutes)', min=0)
     CRT2_3 = models.StringField(label='Emily’s father has three daughters. The first two are named April and May. What is the third daughter’s name?')
@@ -37,17 +37,17 @@ class Player(BasePlayer):
     disparity_unity = models.IntegerField(choices=[[0, '0%'], [25, '25%'], [50, '50%'], [75, '75%'], [100, '100%']], label='What percentage of other players do you think would share your goal?', widget=widgets.RadioSelectHorizontal)
     social_utility_unity = models.IntegerField(choices=[[0, '0%'], [25, '25%'], [50, '50%'], [75, '75%'], [100, '100%']], label='What percentage of other players do you think would share your goal?', widget=widgets.RadioSelectHorizontal)
     percieved_aim = models.StringField(label='In two to three words, what do you think this experiment was about? ')
-class Results(Page):
-    form_model = 'player'
-    @staticmethod
-    def is_displayed(player: Player):
-        participant = player.participant
-        return not participant.disconnected
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        participant = player.participant
-        import time
-        participant.time = time.time()
+    survey_f_seconds = models.FloatField()
+    Big5_1 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...is reserved. ', widget=widgets.RadioSelectHorizontal)
+    Big5_2 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label=' ...is generally trusting.', widget=widgets.RadioSelectHorizontal)
+    Big5_3 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...tends to be lazy.', widget=widgets.RadioSelectHorizontal)
+    Big5_4 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...is relaxed, handles stress well.', widget=widgets.RadioSelectHorizontal)
+    Big5_5 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...has few artistic interests.', widget=widgets.RadioSelectHorizontal)
+    Big5_6 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...is outgoing, sociable.', widget=widgets.RadioSelectHorizontal)
+    Big5_7 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...tends to find fault with others.', widget=widgets.RadioSelectHorizontal)
+    Big5_8 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...does a thorough job.', widget=widgets.RadioSelectHorizontal)
+    Big5_9 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...gets nervous easily.', widget=widgets.RadioSelectHorizontal)
+    Big5_10 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...has an active imagination.', widget=widgets.RadioSelectHorizontal)
 class Page1(Page):
     form_model = 'player'
     form_fields = ['percieved_aim', 'instruction_difficulty']
@@ -89,6 +89,19 @@ class Page3(Page):
         participant.time = time.time()
 class Page4(Page):
     form_model = 'player'
+    form_fields = ['Big5_1', 'Big5_2', 'Big5_3', 'Big5_4', 'Big5_5', 'Big5_6', 'Big5_7', 'Big5_8', 'Big5_9', 'Big5_10']
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return not participant.disconnected
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        import time
+        player.survey_f_seconds = time.time() - participant.time
+        participant.time = time.time()
+class Page5(Page):
+    form_model = 'player'
     form_fields = ['social_utility_explanation', 'social_utility_affect', 'social_utility_plan', 'social_utility_unity']
     @staticmethod
     def is_displayed(player: Player):
@@ -110,7 +123,7 @@ class Page4(Page):
         import time
         player.survey_d_seconds = time.time() - participant.time
         participant.time = time.time()
-class Page5(Page):
+class Page6(Page):
     form_model = 'player'
     form_fields = ['disparity_explanation', 'disparity_affect', 'disparity_plan', 'disparity_unity']
     @staticmethod
@@ -133,6 +146,12 @@ class Page5(Page):
         import time
         player.survey_e_seconds = time.time() - participant.time
         participant.time = time.time()
+class AlternateEnd(Page):
+    form_model = 'player'
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return participant.overwaited
 class End(Page):
     form_model = 'player'
     @staticmethod
@@ -145,8 +164,8 @@ class End(Page):
         from os import environ
         participant.finished = True
         return dict(
-            total=participant.payoff + 3,
+            total=participant.payoff + 2.5,
             wins=int(participant.payoff / 0.25),
             completion_url=environ.get('OTREE_COMPLETION_URL'), 
         )
-page_sequence = [Results, Page1, Page2, Page3, Page4, Page5, End]
+page_sequence = [Page1, Page2, Page3, Page4, Page5, Page6, AlternateEnd, End]

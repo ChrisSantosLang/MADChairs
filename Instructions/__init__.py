@@ -32,4 +32,5 @@ class Instructions(Page):
         participant.time = time.time()
         participant.skill_rating = trueskill.Rating()
         participant.disconnected = False
+        participant.overwaited = False
 page_sequence = [Information, Instructions]

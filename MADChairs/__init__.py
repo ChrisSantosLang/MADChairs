@@ -16,6 +16,7 @@ class C(BaseConstants):
     TIMER_DISPLAY_AT = 30
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
+    WAIT_LIMIT = 1200
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
@@ -81,6 +82,18 @@ def live_update(player: Player, data):
         player.timedOut = True
         player.selection = random.choice(C.BUTTONS)
     return {player.id_in_group: "selection_made"}
+def waited_too_long(player: Player):
+    participant = player.participant
+    import time
+    return time.time() - participant.time > C.WAIT_LIMIT
+def group_by_arrival_time_method(subsession, waiting_players):
+    if len(waiting_players) >= C.PLAYERS_PER_GROUP:
+        return waiting_players[:C.PLAYERS_PER_GROUP]
+    for p in waiting_players:
+        if waited_too_long(p):
+            p.participant.disconnected = True
+            p.participant.waiting_too_long = True
+            return [p]
 class WaitingToBegin(WaitPage):
     group_by_arrival_time = True
     after_all_players_arrive = record_wait_time
@@ -164,4 +177,15 @@ class Strategy(Page):
         return C.QUESTION_TIMER
 class MADChairsWaitPage(WaitPage):
     after_all_players_arrive = set_payoffs
-page_sequence = [WaitingToBegin, MADChairs, Strategy, MADChairsWaitPage]
+class Results(Page):
+    form_model = 'player'
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return player.round_number == C.NUM_ROUNDS and not participant.disconnected
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        import time
+        participant.time = time.time()
+page_sequence = [WaitingToBegin, MADChairs, Strategy, MADChairsWaitPage, Results]
