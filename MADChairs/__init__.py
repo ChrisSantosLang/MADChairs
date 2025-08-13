@@ -176,6 +176,7 @@ class MADChairs(Page):
             player.selection = random.choice(C.BUTTONS)
     @staticmethod
     def get_timeout_seconds(player: Player):
+        participant = player.participant
         participant.disconnected = True
         return C.MAX_TIME
 class Strategy(Page):
