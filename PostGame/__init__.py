@@ -146,12 +146,6 @@ class Page6(Page):
         import time
         player.survey_e_seconds = time.time() - participant.time
         participant.time = time.time()
-class AlternateEnd(Page):
-    form_model = 'player'
-    @staticmethod
-    def is_displayed(player: Player):
-        participant = player.participant
-        return participant.overwaited
 class End(Page):
     form_model = 'player'
     @staticmethod
@@ -168,4 +162,4 @@ class End(Page):
             wins=int(participant.payoff / 0.25),
             completion_url=environ.get('OTREE_COMPLETION_URL'), 
         )
-page_sequence = [Page1, Page2, Page3, Page4, Page5, Page6, AlternateEnd, End]
+page_sequence = [Page1, Page2, Page3, Page4, Page5, Page6, End]

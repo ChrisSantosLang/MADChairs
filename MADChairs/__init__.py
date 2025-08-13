@@ -102,6 +102,12 @@ class WaitingToBegin(WaitPage):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
+class AlternateEnd(Page):
+    form_model = 'player'
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return participant.overwaited
 class MADChairs(Page):
     form_model = 'player'
     live_method = 'live_update'
@@ -192,4 +198,4 @@ class Results(Page):
         participant = player.participant
         import time
         participant.time = time.time()
-page_sequence = [WaitingToBegin, MADChairs, Strategy, MADChairsWaitPage, Results]
+page_sequence = [WaitingToBegin, AlternateEnd, MADChairs, Strategy, MADChairsWaitPage, Results]
