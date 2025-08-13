@@ -114,7 +114,15 @@ class MADChairs(Page):
     @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
-        return not participant.overwaited
+        if participant.overwaited:
+            return False
+        if participant.disconnected:
+            import random
+            player.timedOut = True
+            player.selection = random.choice(C.BUTTONS)
+            return False
+        participant.disconnected = True
+        return True
     @staticmethod
     def js_vars(player: Player):
         group = player.group
@@ -169,12 +177,7 @@ class MADChairs(Page):
             player.selection = random.choice(C.BUTTONS)
     @staticmethod
     def get_timeout_seconds(player: Player):
-        participant = player.participant
-        if participant.disconnected:
-            return 0
-        else:
-            participant.disconnected = True
-            return C.MAX_TIME
+        return C.MAX_TIME
 class Strategy(Page):
     form_model = 'player'
     form_fields = ['strategy']
