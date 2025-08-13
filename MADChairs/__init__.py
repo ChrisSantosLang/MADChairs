@@ -106,6 +106,10 @@ class MADChairs(Page):
     form_model = 'player'
     live_method = 'live_update'
     @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return not participant.overwaited
+    @staticmethod
     def js_vars(player: Player):
         group = player.group
         participant = player.participant
