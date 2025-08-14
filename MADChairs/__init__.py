@@ -69,6 +69,7 @@ class Player(BasePlayer):
     skill_estimate = models.FloatField(blank=True)
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
+    disconnectChecked = models.BooleanField(initial=False)
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant
@@ -116,7 +117,8 @@ class MADChairs(Page):
         participant = player.participant
         if participant.overwaited:
             return False
-        if not player.timedOut:
+        if not player.disconnectChecked:
+            player.disconnectChecked = True
             if participant.disconnected:
                 import random
                 player.timedOut = True
