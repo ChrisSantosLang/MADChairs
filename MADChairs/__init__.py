@@ -17,11 +17,14 @@ class C(BaseConstants):
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     WAIT_LIMIT = 1200
+    ADVICE = None
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
     pass
 def set_payoffs(group: Group):
+    session = group.session
+    subsession = group.subsession
     import trueskill
     import math
     players = group.get_players()
@@ -55,13 +58,30 @@ def set_payoffs(group: Group):
     for player_rating in zip(players, trueskill.rate([(p.participant.skill_rating,) for p in players], winners)):
         player_rating[0].participant.skill_rating = player_rating[1][0]
         player_rating[0].skill_estimate = player_rating[1][0].mu
+    for p in players:
+        subsession.session.popularity[p.selection] += 1 + p.id_in_group/10000
+    sorted_chairs = sorted(subsession.session.popularity.items(), key=lambda item: item[1])
+    sorted_players = [id_in_group for debt, id_in_group in sorted([(-p.debt, p.id_in_group) for p in players])]
+    num_losers = C.PLAYERS_PER_GROUP - len(C.BUTTONS)
+    subsession.session.caste = {id: (sorted_chairs + ([sorted_chairs[-1]] * num_losers))[i][0] for i, id in enumerate(sorted_players)}
+    offset = len(sorted_chairs)
+    while sorted_chairs[offset-1][1] - sorted_chairs[0][1] > 1:
+        offset -= 1
+    if offset < len(sorted_chairs):
+        sorted_chairs = sorted_chairs[offset:] + sorted_chairs[:offset]
+    subsession.session.turntaking = {id: (([sorted_chairs[0]] * num_losers) + sorted_chairs)[i][0] for i, id in enumerate(sorted_players)}
 def record_wait_time(group: Group):
     session = group.session
     import time
     ids_in_group = [p.participant.id_in_session for p in group.get_players()]
     for p in group.get_players(): 
+        p.participant.disconnectChecked = [False] * C.NUM_ROUNDS
         p.participant.ids_in_group = ids_in_group
         p.participant.wait_seconds = time.time() - p.participant.time
+    session.popularity = {name: 0 for name in C.BUTTONS}
+    num_losers = C.PLAYERS_PER_GROUP - len(C.BUTTONS)
+    session.turntaking = {index + 1: chair for index, chair in enumerate(([C.BUTTONS[0]] * num_losers) + list(C.BUTTONS))}
+    session.caste = {index + 1: chair for index, chair in enumerate(list(C.BUTTONS) + ([C.BUTTONS[-1]] * num_losers))}
 class Player(BasePlayer):
     selection = models.StringField(choices=[['A', 'A'], ['B', 'B'], ['C', 'C'], ['D', 'D'], ['skip', 'skip']])
     timedOut = models.BooleanField(initial=False)
@@ -69,7 +89,7 @@ class Player(BasePlayer):
     skill_estimate = models.FloatField(blank=True)
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
-    disconnectChecked = models.BooleanField(initial=False)
+    advice = models.StringField(blank=True)
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant
@@ -95,6 +115,28 @@ def group_by_arrival_time_method(subsession, waiting_players):
             p.participant.disconnected = True
             p.participant.overwaited = True
             return [p]
+def ensure_list(data):
+    if isinstance(data, list):	
+        return data
+    elif isinstance(data, tuple):
+        return list(data)
+    return [data]	
+def advice_str(strategy, player):
+    if not isinstance(strategy, str):
+        return ""
+    if strategy.lower() == "turn-taking": 
+        return player.session.turntaking[player.id_in_group]
+    elif strategy.lower() == "caste": 
+        return player.session.caste[player.id_in_group]
+    elif strategy.lower() == "random": 
+        import random
+        return random.choice(C.BUTTONS)
+    return strategy
+def advice(player):
+    adviceList = ensure_list(C.ADVICE)
+    strategies = ensure_list(adviceList[(player.round_number-1)%len(adviceList)])
+    player.advice = " or ".join([advice_str(s, player) for s in strategies])
+    return player.advice
 class WaitingToBegin(WaitPage):
     group_by_arrival_time = True
     after_all_players_arrive = record_wait_time
@@ -117,27 +159,32 @@ class MADChairs(Page):
         participant = player.participant
         if participant.overwaited:
             return False
-        if not player.disconnectChecked:
-            player.disconnectChecked = True
+        if not participant.disconnectChecked[player.round_number - 1]:
+            participant.disconnectChecked[player.round_number - 1] = True
             if participant.disconnected:
                 import random
                 player.timedOut = True
                 player.selection = random.choice(C.BUTTONS)
                 return False
             participant.disconnected = True
+            player.advice = advice(player)
         return True
     @staticmethod
     def js_vars(player: Player):
+        session = player.session
         group = player.group
         participant = player.participant
         import time
         historyHTML = ["<tr>"]
         players = group.get_players()
+        historyHTML.extend(["<td style='width: 110pt'>"])
         if len(players[0].in_previous_rounds()) > 0:
-            historyHTML.extend(["<td style='width: 110pt'><b>Previous rounds:</b></td>"])
+            historyHTML.extend(["<b>Previous rounds:</b>"])
             for hist in players[0].in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]:
-                historyHTML.extend(["<td style='width: 20pt; text-align: center;'><b>", str(hist.round_number), "</b></td>"])
-            historyHTML.extend(["<td style='width: 110pt;'><b>Bonus</b></td>"])
+                historyHTML.extend(["</td><td style='width: 20pt; text-align: center;'><b>", str(hist.round_number), "</b>"])
+        historyHTML.extend(["</td><td style='width: 110pt; text-align: center;'><b>Bonus</b></td>"])
+        if player.advice != "":
+            historyHTML.extend(["<td style='width: 60pt; text-align: center;'><b>Advice</b></td>"])
         historyHTML.append("</tr>")
         for p in players:
             p.participant.time = time.time()
@@ -159,9 +206,14 @@ class MADChairs(Page):
             if timeouts > 0:
                 total_payoff = "".join([str(total_payoff), "<i> (", str(timeouts), " timeouts)</i>"])
             if p.id_in_group == player.id_in_group:
-                historyHTML.extend(["<td style='width: 60pt'><b>", str(total_payoff), "</b></td>"])
+                historyHTML.extend(["<td style='width: 110pt; text-align: center;'><b>", str(total_payoff), "</b></td>"])
             else:
-                historyHTML.extend(["<td style='width: 60pt'>", str(total_payoff), "</td>"])
+                historyHTML.extend(["<td style='width: 110pt; text-align: center;'>", str(total_payoff), "</td>"])
+            if player.advice != "":    
+                if p.id_in_group == player.id_in_group:
+                    historyHTML.extend(["<td style='width: 60pt; text-align: center;'><b>", p.advice, "</b></td>"])
+                else:
+                    historyHTML.extend(["<td style='width: 60pt; text-align: center;'>", p.advice, "</td>"])    
             historyHTML.append("</tr>") 
         return dict(
             historyHTML = "".join(historyHTML),

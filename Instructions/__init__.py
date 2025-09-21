@@ -30,7 +30,7 @@ class Instructions(Page):
         import trueskill
         player.instruction_seconds = time.time() - participant.time
         participant.time = time.time()
-        participant.skill_rating = trueskill.Rating()
+        participant.skill_rating = trueskill.Rating(mu=25, sigma=2)
         participant.disconnected = False
         participant.overwaited = False
 page_sequence = [Information, Instructions]
