@@ -6,7 +6,8 @@ Code for an [oTree](https://otree.readthedocs.io/en/latest/index.html) server to
 Some constants you can change easily in `MADChairs/__init__.py`:
 * PLAYERS_PER_GROUP: The number of players (should be at least 5 for four buttons)
 * NUM_ROUNDS: How many rounds to repeat the game
-* MAX_HISTORY_DISPLAY: Display this many round of previous history 
+* MAX_HISTORY_DISPLAY: Display this many round of previous history
+* ADVICE: What advice to display (if any). `None` will display no advice. `'random'`, `'caste'`, or `'turn-taking'` will be replaced by whatever selection that strategy would recommend. Use a tuple to cycle advices, e.g., `(None, None, 'turn-taking')` would show advice every third round. You can also show multiple advice in the same round, e.g., `(('caste','turn-taking'),)` would always show both caste and turn-taking.
 * PRIZE: How many British pounds (or server currency) to award players who click a button no other player clicks
 * PLAYER_LABELS: A tuple of displayed names
 * MAX_TIME: The maximum number of seconds per round
@@ -26,7 +27,8 @@ Some specal data columns of note:
 * MADChairs.{round}.player.timedOut: "1" is the player timed-out so selection was randomized in that {round}
 * MADChairs.{round}.player.debt: Cumulative debt of favors owed to other players from the first round until that {round}
 * MADChairs.{round}.player.skill_estimate: The player's estimated skill based on peformance in that and previous {rounds}
-* MADChairs.{round}.player.strategy: The player's description of their strategy
+* MADChairs.{round}.player.strategy: The player's description of their strategy (if any)
+* MADChairs.{round}.player.advice: What advice was displayed (if any)
 
 You may want to use
 * [oTree hub](https://www.otreehub.com/)
