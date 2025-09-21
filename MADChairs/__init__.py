@@ -90,6 +90,9 @@ class Player(BasePlayer):
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
     advice = models.StringField(blank=True)
+def random_selection():
+    import random
+    return random.choice(C.BUTTONS)
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant
@@ -99,9 +102,8 @@ def live_update(player: Player, data):
     if "selected" in data and data["selected"] in C.BUTTONS:
         player.selection = data["selected"]
     elif "timeout" in data:
-        import random
         player.timedOut = True
-        player.selection = random.choice(C.BUTTONS)
+        player.selection = random_selection()
     return {player.id_in_group: "selection_made"}
 def waited_too_long(player: Player):
     participant = player.participant
@@ -121,21 +123,14 @@ def ensure_list(data):
     elif isinstance(data, tuple):
         return list(data)
     return [data]	
-def advice_str(strategy, player):
-    if not isinstance(strategy, str):
-        return ""
-    if strategy.lower() == "turn-taking": 
-        return player.session.turntaking[player.id_in_group]
-    elif strategy.lower() == "caste": 
-        return player.session.caste[player.id_in_group]
-    elif strategy.lower() == "random": 
-        import random
-        return random.choice(C.BUTTONS)
-    return strategy
 def advice(player):
     adviceList = ensure_list(C.ADVICE)
-    strategies = ensure_list(adviceList[(player.round_number-1)%len(adviceList)])
-    player.advice = " or ".join([advice_str(s, player) for s in strategies])
+    strategies = adviceList[(player.round_number-1)%len(adviceList)]
+    player.advice = str(strategies).format(
+        turntaking=player.session.turntaking[player.id_in_group],
+        caste=player.session.caste[player.id_in_group],
+        random=random_selection()
+    )
     return player.advice
 class WaitingToBegin(WaitPage):
     group_by_arrival_time = True
@@ -162,9 +157,8 @@ class MADChairs(Page):
         if not participant.disconnectChecked[player.round_number - 1]:
             participant.disconnectChecked[player.round_number - 1] = True
             if participant.disconnected:
-                import random
                 player.timedOut = True
-                player.selection = random.choice(C.BUTTONS)
+                player.selection = random_selection()
                 return False
             participant.disconnected = True
             player.advice = advice(player)
@@ -225,11 +219,10 @@ class MADChairs(Page):
     def before_next_page(player: Player, timeout_happened):
         participant = player.participant
         if timeout_happened:
-            import random
             import time
             player.timedOut = True
             player.secondsElapsed = time.time() - player.participant.time
-            player.selection = random.choice(C.BUTTONS)
+            player.selection = random_selection()
     @staticmethod
     def get_timeout_seconds(player: Player):
         return C.MAX_TIME
