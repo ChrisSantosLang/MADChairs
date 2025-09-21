@@ -7,7 +7,7 @@ Some constants you can change easily in `MADChairs/__init__.py`:
 * PLAYERS_PER_GROUP: The number of players (should be at least 5 for four buttons)
 * NUM_ROUNDS: How many rounds to repeat the game
 * MAX_HISTORY_DISPLAY: Display this many round of previous history
-* ADVICE: What advice to display (if any). `None` will display no advice. `'random'`, `'caste'`, or `'turn-taking'` will be replaced by whatever selection that strategy would recommend. Use a tuple to cycle advices, e.g., `(None, None, 'turn-taking')` would show advice every third round. You can also show multiple advice in the same round, e.g., `(('caste','turn-taking'),)` would always show both caste and turn-taking.
+* ADVICE: What advice to display (if any). `None` will display no advice. `{random}`, `{caste}`, and `{turntaking}` will be replaced by whatever selection that strategy would recommend, so `'{caste} or {turntaking}'` would show both caste and turntaking. Tuples cycle by round, so `(None, None, '{turntaking}')` would show advice every third round.
 * PRIZE: How many British pounds (or server currency) to award players who click a button no other player clicks
 * PLAYER_LABELS: A tuple of displayed names
 * MAX_TIME: The maximum number of seconds per round
