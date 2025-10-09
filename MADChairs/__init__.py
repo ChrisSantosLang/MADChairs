@@ -18,6 +18,7 @@ class C(BaseConstants):
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     ADVICE = None
+    HIDE_CHAT = True
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
@@ -179,9 +180,9 @@ class MADChairs(Page):
             if participant.robot == "":
                 participant.disconnected = True
             players = [p for id in participant.ids_in_group for p in player.subsession.get_players() if p.participant.id_in_session == id]
-            if C.ADVICE and player.field_maybe_none(advice) is None:
+            if player.field_maybe_none(advice) is None:
                 for p in players:
-                    p.advice = advice(p) 
+                    p.advice = advice(p) if C.ADVICE else ""
             robots = set()
             for p in players:
                 if p.participant.robot != "":
@@ -200,7 +201,14 @@ class MADChairs(Page):
             historyHTML = historyHTML(player),
             BUFFER_INIT = C.BUFFER_INIT,
             TIMER_DISPLAY_AT = C.TIMER_DISPLAY_AT,
-            TIMER_INCREMENT = C.TIMER_INCREMENT
+            TIMER_INCREMENT = C.TIMER_INCREMENT,
+            HIDE_CHAT = C.HIDE_CHAT
+        )
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            playerName=name(player),
+            groupId=player.participant.ids_in_group[0]
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened):

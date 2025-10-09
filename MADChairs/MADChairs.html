@@ -30,6 +30,11 @@
 <div id="extension" style="display: none">
     Time remaining: <span id="displayedTimer"></span> seconds <span id="timerResetLink">(<a href="javascript:;" onclick="extendTime()">add 30 more seconds</a>). If time runs out, then you will not be paid for this round.</span>
 </div>
+<div id="chat">
+    <br>
+    <p><b><u>You may chat with other players here:</u></b></p>
+    {{ chat nickname=playerName channel=groupId }}
+</div>
 <br>
 <table id="historyTable"></table>
 
@@ -50,6 +55,9 @@ function extendTime() {
 
 document.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
+    if (js_vars.HIDE_CHAT){
+        $('#chat').hide();
+    }
     js_vars.timer_buffer = js_vars.BUFFER_INIT;
     $('#A').on('click', function (event) {
         $('#selection').text('A');
