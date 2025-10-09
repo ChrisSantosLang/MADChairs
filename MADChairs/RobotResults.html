@@ -1,0 +1,12 @@
+{{ extends 'global/Page.html' }}
+{{ block title }}Final Results{{ endblock }}
+
+{{ block content }}<table id="historyTable"></table>{{ endblock }}
+
+{{ block scripts }}
+<script>
+document.addEventListener("DOMContentLoaded", function (event) {
+    document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
+    });
+</script>
+{{ endblock }}
