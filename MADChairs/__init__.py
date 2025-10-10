@@ -31,9 +31,11 @@ class Player(BasePlayer):
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
     advice = models.StringField(blank=True)
-def random_selection():
+def random_selection(player=None, n=1):
     import random
-    return random.choice(C.BUTTONS)
+    if (player is None) or (n < 1) or (player.round_number == 1) or ((random.random() < 1/n) and not player.in_round(player.round_number - 1).payoff):
+        return random.choice(C.BUTTONS)
+    return player.in_round(player.round_number - 1).selection
 def live_update(player: Player, data):
     group = player.group
     participant = player.participant
@@ -93,24 +95,33 @@ def rotate(player, n=1, group_vars=None):
     rotated_player = [p for p in player.subsession.get_players() if p.participant.id_in_session == rotated_id][0]
     return rotated_player.in_round(now - 1).selection
 def advice(player, adviceList=C.ADVICE):
+    import re
     advice = ensure_list(strategy_list(adviceList))
     advice = advice[(player.round_number-1) % len(advice)]
-    advice = advice if advice else ""
+    if not advice:
+        return ""
+    advice = str(advice)
     group_vars = [p for p in player.subsession.session.get_participants() if p.id_in_session == player.participant.ids_in_group[0]][0]
     if "{turntaking}" in advice:
-        advice = str(advice).format(turntaking=group_vars.turntaking[player.id_in_group])
+        advice = advice.format(turntaking=group_vars.turntaking[player.id_in_group])
     if "{caste}" in advice:
-        advice = str(advice).format(caste=group_vars.caste[player.id_in_group])
-    if "{random}" in advice:
-        advice = str(advice).format(random=random_selection())
-    if "{rotate2}" in advice:
-        advice = str(advice).format(rotate2=rotate(player, 2, group_vars=group_vars))
-    if "{rotate}" in advice:
-        advice = str(advice).format(rotate=rotate(player, group_vars=group_vars))
+        advice = advice.format(caste=group_vars.caste[player.id_in_group])
+    while True:
+        m = re.search(r'\{random(\d*)\}', advice)
+        if m is None:
+            break
+        n = int(m.group(1)) if m.group(1) else 0
+        advice = advice.replace(m.group(0), random_selection(player, n))
+    while True:
+        m = re.search(r'\{rotate(\d*)\}', advice)
+        if m is None:
+            break
+        n = int(m.group(1)) if m.group(1) else 1
+        advice = advice.replace(m.group(0), rotate(player, n, group_vars=group_vars))
     if "{obey}" in advice:
-        advice = str(advice).format(obey=player.field_maybe_none('advice'))
+        advice = advice.format(obey=player.field_maybe_none('advice'))
     if "{equalize}" in advice:
-        advice = str(advice).format(equalize=group_vars.equalize[player.id_in_group])
+        advice = advice.format(equalize=group_vars.equalize[player.id_in_group])
     return advice
 def name(player): 
     return (C.PLAYER_LABEL if player.participant.robot == "" else C.ROBOT_LABEL) + str(player.id_in_group)
