@@ -22,6 +22,7 @@ To specify different selections for different rounds, specify a sequence of sele
 * `ROBOTS = {"all": {1: "{caste}", 7:"{turntaking}"}}`
 * `ROBOTS = {"all": {1: "{caste}", 7:"{rotate2}"}}`
 * `ROBOTS = {"all": {1: "{caste}", 7:"{equalize}"}}`
+
 Other ways in which `{turntaking}` differs from `{equalize}` and `{rotate}` are to be harder to learn (difficult to apply without help from a computer) and to be more robust against players who refuse to follow it. 
 
 In `MADChairs/__init__.py`, it can be useful to adjust these constants:
