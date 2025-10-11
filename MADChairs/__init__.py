@@ -19,27 +19,41 @@ class C(BaseConstants):
     PRIZE = cu(0.25)
     ADVICE = None
     HIDE_CHAT = True
+    HIDE_SKIP = True
 class Subsession(BaseSubsession):
     pass
 class Group(BaseGroup):
     pass
 class Player(BasePlayer):
-    selection = models.StringField(choices=[['A', 'A'], ['B', 'B'], ['C', 'C'], ['D', 'D'], ['skip', 'skip']])
+    selection = models.StringField()
     timedOut = models.BooleanField(initial=False)
     secondsElapsed = models.FloatField()
     skill_estimate = models.FloatField(blank=True)
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
     advice = models.StringField(blank=True)
+def makeOptions(stored=None): 
+    def inner():
+        nonlocal stored
+        if stored is not None:
+            return stored 
+        stored = list(C.BUTTONS) if C.HIDE_SKIP else list(C.BUTTONS) + ['skip']
+        return stored
+    return inner
+playerOptions = makeOptions()
 def random_selection(player=None, n=0):
     import random
-    if (player is None) or (n < 1) or (player.round_number == 1):
+    if (n < 1) or (player is None):
+        return random.choice(playerOptions())
+    if player.round_number == 1:
         return random.choice(C.BUTTONS)
     if ((random.random() < 1/n) and not player.in_round(player.round_number - 1).payoff):
         previous = [p.selection for p in player.in_round(player.round_number - 1).group.get_players()]
         options = [button for button in C.BUTTONS if button not in previous]
         if len(options) < 1:
             options = [button for button in C.BUTTONS if previous.count(button) == 1]
+        if len(options) < 1:
+            options = C.BUTTONS
         return random.choice(options)
     return player.in_round(player.round_number - 1).selection
 def live_update(player: Player, data):
@@ -52,7 +66,7 @@ def live_update(player: Player, data):
     if "extended" in data:
         return {player.id_in_group: None}
     player.secondsElapsed = time.time() - participant.time
-    if "selected" in data and data["selected"] in C.BUTTONS:
+    if "selected" in data and data["selected"] in playerOptions():
         player.selection = data["selected"]
         player.timedOut = False
     elif "timeout" in data:
@@ -92,11 +106,14 @@ def group_by_arrival_time_method(subsession, waiting_players):
             group_vars.casteViolations = {id: 0 for id in range(1, len(group_vars.ids_in_group) + 1)}
             group_vars.eqViolations = {id: 0 for id in range(1, len(group_vars.ids_in_group) + 1)}
             extra_players = len(group_vars.ids_in_group) - len(C.BUTTONS)
-            group_vars.turntaking = {index + 1: chair for index, chair in enumerate(([C.BUTTONS[0]] * extra_players) + list(C.BUTTONS))}
-            group_vars.caste = {index + 1: chair for index, chair in enumerate(list(C.BUTTONS) + ([C.BUTTONS[-1]] * extra_players))}
-            group_vars.equalize = {index + 1: chair for index, chair in enumerate(([C.BUTTONS[0]] * extra_players) + list(C.BUTTONS))}
+            extra_options = [C.BUTTONS[-1] if C.HIDE_SKIP else 'skip'] * extra_players 
+            group_vars.equalize = {index + 1: button for index, button in enumerate(list(C.BUTTONS) + extra_options)}
+            group_vars.caste = {index + 1: button for index, button in enumerate(list(C.BUTTONS) + extra_options)}
+            if C.HIDE_SKIP:
+                extra_options = [C.BUTTONS[0]] * extra_players
+            group_vars.turntaking = {index + 1: button for index, button in enumerate(extra_options + list(C.BUTTONS))}
             group_vars.session.prize = C.PRIZE
-            group_vars.session.max_social = C.NUM_ROUNDS * (len(C.BUTTONS) - 1) * C.PRIZE
+            group_vars.session.max_social = C.NUM_ROUNDS * C.PRIZE * (len(C.BUTTONS) - (1 if C.HIDE_SKIP else 0)) 
         return grouped
 def rotate(player, n=1, group_vars=None): 
     now = player.round_number
@@ -200,6 +217,8 @@ def makeButtons(stored=None):
         buttonHTML = ["<table><tr>"]
         for button in C.BUTTONS:
             buttonHTML.extend(['<td><button id="', button, '" class="btn btn-primary">&nbsp;', button, '&nbsp;</button>&nbsp;&nbsp;&nbsp;&nbsp;</td>'])
+        if not C.HIDE_SKIP:
+            buttonHTML.append('<td><a href="javascript:;" onclick="skipClicked()">skip this round</a></td>') 
         buttonHTML.append("</tr></table>") 
         stored = "".join(buttonHTML)
         return stored
@@ -234,7 +253,7 @@ class MADChairs(Page):
                     if isinstance(p.participant.robot, dict):
                         p.participant.robot = strategy_list(p.participant.robot, default="{obey}")
                     strategy = advice(p, p.participant.robot) 
-                    p.selection = strategy if strategy in C.BUTTONS else random_selection()
+                    p.selection = strategy if strategy in playerOptions() else random_selection()
             player.group.get_player_by_id(1).participant.finished = robots
         return participant.robot == ""
     @staticmethod
@@ -284,7 +303,7 @@ def updateTrueSkill(players):
         if len(me.in_previous_rounds()) > 0:
             me.debt = me.in_previous_rounds()[-1].debt
         else:
-            me.debt = (len(players) - me.id_in_group)/100  #residue to stabilize ties
+            me.debt = (len(players) - me.id_in_group)/100000  #residue to stabilize ties
         for other in players:
              if me.id_in_group != other.id_in_group:
                  otherRating = other.participant.skill_rating 
@@ -306,7 +325,8 @@ def updateTrueSkill(players):
 def updateStrategies(players, group_vars):
     updateTrueSkill(players)
     for p in players:
-        group_vars.popularity[p.selection] += 1 + p.id_in_group/10000 #residue to stabilize ties
+        if p.selection in C.BUTTONS:
+            group_vars.popularity[p.selection] += 1 + p.id_in_group/10000 #residue to stabilize ties
         group_vars.turnViolations[p.id_in_group] = group_vars.turnViolations[p.id_in_group] * 0.7 
         if p.selection != group_vars.turntaking[p.id_in_group]:
             group_vars.turnViolations[p.id_in_group] += 1 
@@ -317,25 +337,25 @@ def updateStrategies(players, group_vars):
         if p.selection != group_vars.equalize[p.id_in_group]:
             group_vars.eqViolations[p.id_in_group] += 1
     extra_players = len(group_vars.ids_in_group) - len(C.BUTTONS)
-    sorted_chairs = sorted(group_vars.popularity.items(), key=lambda item: item[1])
+    sorted_buttons = sorted(group_vars.popularity.items(), key=lambda item: item[1])
     # equalize
     win_sorted_players = [id_in_group for bonus, id_in_group in sorted([(p.participant.payoff, p.id_in_group) for p in players])]
     learners = [p for p in win_sorted_players if group_vars.eqViolations[p] < 1] 
     equal_players = learners + [p for p in win_sorted_players if p not in learners]
-    extra_chairs = [sorted_chairs[-1]] * extra_players
-    group_vars.equalize = {id: (sorted_chairs + extra_chairs)[i][0] for i, id in enumerate(equal_players)}
+    extra_buttons = [(sorted_buttons[-1] if C.HIDE_SKIP else ('skip',))] * extra_players
+    group_vars.equalize = {id: (sorted_buttons + extra_buttons)[i][0] for i, id in enumerate(equal_players)}
     # caste
     debt_sorted_players = [id_in_group for debt, id_in_group in sorted([(-p.debt, p.id_in_group) for p in players])]
     learners = [p for p in debt_sorted_players if group_vars.casteViolations[p] < 1] 
     castePlayers = learners + [p for p in debt_sorted_players if p not in learners]
-    group_vars.caste = {id: (sorted_chairs + extra_chairs)[i][0] for i, id in enumerate(castePlayers)}
+    group_vars.caste = {id: (sorted_buttons + extra_buttons)[i][0] for i, id in enumerate(castePlayers)}
     #turn-taking
     learners = [p for p in debt_sorted_players if group_vars.turnViolations[p] < 1] 
     turnTakers = [p for p in debt_sorted_players if p not in learners] + learners
-    free = [chair for chair in sorted_chairs if chair[1] < players[0].round_number * 1.1] 
-    sorted_chairs = [chair for chair in sorted_chairs if chair not in free] + free
-    extra_chairs = [sorted_chairs[0]] * extra_players
-    group_vars.turntaking = {id: (extra_chairs + sorted_chairs)[i][0] for i, id in enumerate(turnTakers)}
+    free = [button for button in sorted_buttons if button[1] < players[0].round_number * 1.1] 
+    sorted_buttons = [button for button in sorted_buttons if button not in free] + free
+    extra_buttons = [(sorted_buttons[0] if C.HIDE_SKIP else ('skip',))] * extra_players
+    group_vars.turntaking = {id: (extra_buttons + sorted_buttons)[i][0] for i, id in enumerate(turnTakers)}
 class Strategy(Page):
     form_model = 'player'
     form_fields = ['strategy']

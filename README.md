@@ -19,12 +19,14 @@ In `GroupPlayers`, it can be useful to adjust these constants:
   * `{obey}` will be replaced by whatever advice was given to that robot (see ADVICE below).
   * Invalid selections will be relaced with random valid selections.
 
-To specify different selections for different rounds, specify a sequence of selections through which to cycle like `("A", "B", "C")` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {4: "B"}}`, which would be equivalent to `{4: ("{obey}", "{obey}", "{obey}", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"default"`), and `"{obey}"` will be assumed for round 1 if no other selection is specified. As examples, `{1: "{obey}", 2: "{obey}", 5: "{random3}", "default": {1: "{random3}", 7: "{obey}"}}` is useful (with at least 20 rounds) to see the differences between advising `"{turntaking}"`, `"{equalize}"`, and `"{rotate2}"`. All three maximize total bonus with zero disparity when followed by all players, but equalize completely forgives Player3 and Player4 for delaying obedience until round 7; rotate2 does not forgive, but becomes fragile unless *all* players follow it. Turn-taking is robust, but may be too complicated for players to master without machine assistance.
+To specify different selections for different rounds, specify a sequence of selections through which to cycle like `("A", "B", "C")` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {4: "B"}}`, which would be equivalent to `{4: ("{obey}", "{obey}", "{obey}", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"default"`), and `"{obey}"` will be assumed for round 1 if no other selection is specified. As examples, `{1: "{obey}", 2: "{obey}", 5: "{random3}", "default": {1: "{random3}", 7: "{obey}"}}` is useful (with at least 20 rounds) to see the differences between advising `"{turntaking}"`, `"{equalize}"`, and `"{rotate2}"`. When followed by all players, all three maximize total bonus with zero disparity. However, equalize completely forgives Player3 and Player4 for delaying obedience until round 7; rotate2 does not forgive, but it becomes fragile unless *all* players follow it. Turn-taking is robust, but may be too complicated for players to master without machine assistance.
 
+![Comparing turn-taking, equalize, and rotate2](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Robots.png?raw=true)
 
 In `MADChairs/__init__.py`, it can be useful to adjust these constants:
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
-* `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number of buttons.
+* `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number of buttons
+* `HIDE_SKIP` (default `True`): Hides the ability to skip the round
 * `MAX_HISTORY_DISPLAY` (default `8`): How many round of previous history to display 
 * `PRIZE` (default `cu(0.25)`): How many British pounds (or server currency) to award players who click a button no other player clicks
 * `PLAYER_LABEL` (default `'Player'`): The prefix for player ids (e.g. "Player1")

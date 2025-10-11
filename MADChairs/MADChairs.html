@@ -46,6 +46,11 @@ function extendTime() {
     liveSend({'extended': js_vars.timer_buffer, 'round': js_vars.round});
 }
 
+function skipClicked() {
+    $('#selection').text('skip');
+    $('#check').show();
+}
+
 document.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
     document.getElementById('buttonTable').innerHTML = js_vars.buttonHTML;
