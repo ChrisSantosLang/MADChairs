@@ -10,23 +10,21 @@ To test locally, [install otree](https://github.com/oTree-org/otree-core) locall
 In `GroupPlayers`, it can be useful to adjust these constants:
 * `PLAYERS_PER_GROUP` (default `5`): The number of players (should be at least 5 for four buttons)
 * `WAIT_LIMIT` (default `1200`): Maximum seconds in the wait room before a player is automatically advanced to the alternate ending
-* `ROBOTS` (default `None`): Specifies which players to replace with robots of which kinds. For example `{2: "A"}` would replace player 2 with a robot that always selects "A". `"all"` means to replace all players with robots making the specified selection. If ROBOTS is not specified as a dictionary, then `"all"` is assumed, so `"A"` is equivalent to `{"all": "A"}`. If all players are replaced with robots, then a simulation will be triggered as soon as any player hits the waiting room (so it can be handy to combine such settings with `SKIP_PREGAME = True`). 
-  * `{caste}` and `{turntaking}` will be replaced by the selections recommended by the caste and turn-taking strategies described [here](https://arxiv.org/abs/2503.20986). 
-  * `{rotate}` will be replaced by the previous selection of the next player (or by `{caste}` in first round). If the word "rotate" is followed by a positive integer N, it will copy from the player N steps ahead (i.e. `{rotate}` means `{rotate1}`)
-  * `{random}` will be replaced by a random valid selection. If the word "random" is followed by a positive integer N > 0 and it lost the last round, then it has 1/N probability of shifting to a random valid selection; otherwise it will repeat its previous selection. 
-  * `{equalize}` will be replaced by the selections of a strategy like caste but favoring those with the least accumulated bonus, rather than most debt.
-  * `{obey}` will be replaced by whatever advice is given to that robot.
+* `ROBOTS` (default `None`): Specifies which players to replace with robots of which kinds. For example `{2: "A"}` would replace Player2 with a robot that always selects "A". `"default"` refers to al players not otherwise named, so `{"default": "A", 2: None, 3: "B"}` would replace Player3 with a robot that always selects "B", would leave Player2 human, and replace all other players with robot that always select "A". If ROBOTS is not specified as a dictionary, then it is assumed to be specifying a default, so `"A"` is equivalent to `{"default": "A"}`. If all players are replaced with robots, then a simulation will be triggered as soon as any player hits the waiting room (so it can be handy to combine such settings with `SKIP_PREGAME = True`). 
+  * `{turntaking}` will be replaced by selections that reserve a unique button for each player with *lowest* debt as described [here](https://arxiv.org/abs/2503.20986). 
+  * `{caste}` will be replaced by selections that reserve a unique button for each player with *highest* debt as described [here](https://arxiv.org/abs/2503.20986).
+  * `{equalize}` will be replaced by selections that reserve a unique button for each of the *poorest* players.
+  * `{rotate}` will be replaced by what the player with the next highest number selected in the previous round (or matching `{caste}` in round 1). If the word "rotate" is followed by a positive integer N, then it will copy from the player N numbers ahead (i.e. `{rotate}` means `{rotate1}`)
+  * `{random}` will be replaced by a random valid selection. If the word "random" is followed by a positive integer N > 0 and it lost the last round, then it has 1/N probability of shifting to a random button not selected in the previous round (or selected only once, if all buttons were selected); otherwise the selection will repeat. 
+  * `{obey}` will be replaced by whatever advice was given to that robot (see ADVICE below).
   * Invalid selections will be relaced with random valid selections.
 
-To specify different selections for different rounds, specify a sequence of selections through which to cycle like `{4: ("A", "B", "C")}` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {1: "A", 4: "B"}}`, which would be equivalent to `{4: ("A", "A", "A", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"all"`), and `"{obey}"` will be assumed for round 1 if not specified. As examples, the following simulations (with at least 20 rounds) are useful to see that turn-taking does not seek equality (it allows that some past inequities may have been justified), but it pays more reparations than simple rotation would: 
-* `ROBOTS = {"all": {1: "{caste}", 7:"{turntaking}"}}`
-* `ROBOTS = {"all": {1: "{caste}", 7:"{rotate2}"}}`
-* `ROBOTS = {"all": {1: "{caste}", 7:"{equalize}"}}`
+To specify different selections for different rounds, specify a sequence of selections through which to cycle like `("A", "B", "C")` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {4: "B"}}`, which would be equivalent to `{4: ("{obey}", "{obey}", "{obey}", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"default"`), and `"{obey}"` will be assumed for round 1 if no other selection is specified. As examples, `{1: "{obey}", 2: "{obey}", 5: "{random3}", "default": {1: "{random3}", 7: "{obey}"}}` is useful (with at least 20 rounds) to see the differences between advising `"{turntaking}"`, `"{equalize}"`, and `"{rotate2}"`. All three maximize total bonus with zero disparity when followed by all players, but equalize completely forgives Player3 and Player4 for delaying obedience until round 7; rotate2 does not forgive, but becomes fragile unless *all* players follow it. Turn-taking is robust, but may be too complicated for players to master without machine assistance.
 
-Other ways in which `{turntaking}` differs from `{equalize}` and `{rotate}` are to be harder to learn (difficult to apply without help from a computer) and to be more robust against players who refuse to follow it. 
 
 In `MADChairs/__init__.py`, it can be useful to adjust these constants:
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
+* `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number of buttons.
 * `MAX_HISTORY_DISPLAY` (default `8`): How many round of previous history to display 
 * `PRIZE` (default `cu(0.25)`): How many British pounds (or server currency) to award players who click a button no other player clicks
 * `PLAYER_LABEL` (default `'Player'`): The prefix for player ids (e.g. "Player1")
@@ -38,7 +36,7 @@ In `MADChairs/__init__.py`, it can be useful to adjust these constants:
 * `QUESTION_ROUNDS` (default `(2,)`): The rounds after which to ask users to describe their strategy
 * `QUESTION_TIMER` (default `120`): The time limit (in seconds) for describing one's strategy
 * `HIDE_CHAT` (default `True`): Hides the ability to chat with other players
-* `ADVICE` (default `None`): What to display in the advice column. As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A". 
+* `ADVICE` (default `None`): What to display in the advice column of the history table. As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A". 
 
 Some special data columns of note:
 * `participant.skill_rating`: The participant's [trueskill](https://trueskill.org/) rating at the end of the game

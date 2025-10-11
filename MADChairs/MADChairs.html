@@ -12,15 +12,7 @@
 <p>
     Click a button (any player who clicks a button no other player clicks wins {{ C.PRIZE }}):
 </p>
-<table><tr>
-    <td><button id="A" class="btn btn-primary">&nbsp;A&nbsp;</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button id="B" class="btn btn-primary">&nbsp;B&nbsp;</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button id="C" class="btn btn-primary">&nbsp;C&nbsp;</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td><button id="D" class="btn btn-primary">&nbsp;D&nbsp;</button></td>
-</tr></table>
+<div id="buttonTable"></div>
 <div id="check" style="display: none"><br>&nbsp;&nbsp;&nbsp;&nbsp;
     You clicked <b><span id="selection"></span></b>. &nbsp;&nbsp;&nbsp;
     <button id="confirm" class="btn btn-primary">Confirm</button> &nbsp;&nbsp;&nbsp;
@@ -36,7 +28,7 @@
     {{ chat nickname=playerName channel=groupId }}
 </div>
 <br>
-<table id="historyTable"></table>
+<div id="historyTable"></div>
 
 {{ endblock }}
 
@@ -51,36 +43,25 @@ function liveRecv(data) {
 function extendTime() {
     js_vars.timer_buffer = Math.max(0, js_vars.timer_buffer - js_vars.TIMER_INCREMENT);
     $('#extension').hide();
+    liveSend({'extended': js_vars.timer_buffer, 'round': js_vars.round});
 }
 
 document.addEventListener("DOMContentLoaded", function (event) {
     document.getElementById('historyTable').innerHTML = js_vars.historyHTML;
+    document.getElementById('buttonTable').innerHTML = js_vars.buttonHTML;
     if (js_vars.HIDE_CHAT){
         $('#chat').hide();
     }
     js_vars.timer_buffer = js_vars.BUFFER_INIT;
-    $('#A').on('click', function (event) {
-        $('#selection').text('A');
-        $('#check').show();
-        event.preventDefault();
-    });
-    $('#B').on('click', function (event) {
-        $('#selection').text('B');
-        $('#check').show();
-        event.preventDefault();
-    });
-    $('#C').on('click', function (event) {
-        $('#selection').text('C');
-        $('#check').show();
-        event.preventDefault();
-    });
-    $('#D').on('click', function (event) {
-        $('#selection').text('D');
-        $('#check').show();
-        event.preventDefault();
-    });
+    for (const button of js_vars.BUTTONS){
+        $('#'+button).on('click', function (event) {
+            $('#selection').text(button);
+            $('#check').show();
+            event.preventDefault();
+        });
+    }
     $('#confirm').on('click', function (event) {
-        liveSend({'selected': $('#selection').text()});
+        liveSend({'selected': $('#selection').text(), 'round': js_vars.round});
         event.preventDefault();
     });
     $('#cancel').on('click', function (event) {
@@ -90,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     $('.otree-timer__time-left').on('update.countdown', function (event) {
         let time = event.offset.totalSeconds - js_vars.timer_buffer;
         if (time < 1) {
-            liveSend({'timeout': event.offset.totalSeconds});
+            liveSend({'timeout': event.offset.totalSeconds, 'round': js_vars.round});
         } else if (time <= js_vars.TIMER_DISPLAY_AT) {
             $('#displayedTimer').text(time);
             if (time === js_vars.TIMER_DISPLAY_AT) {

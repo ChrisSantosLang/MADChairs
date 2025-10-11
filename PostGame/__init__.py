@@ -115,7 +115,7 @@ class Page5(Page):
         socialUtility = sum([p.participant.payoff for p in group.get_players() if p.participant.id_in_session in participant.ids_in_group])
         return dict(
             utility = socialUtility,
-            shortfall = 15 - socialUtility,
+            shortfall = session.max_social - socialUtility,
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
@@ -154,12 +154,13 @@ class End(Page):
         return not participant.disconnected
     @staticmethod
     def vars_for_template(player: Player):
+        session = player.session
         participant = player.participant
         from os import environ
         participant.finished = True
         return dict(
-            total=participant.payoff + 2.5,
-            wins=int(participant.payoff / 0.25),
+            total=participant.payoff + session.config.get("participation_fee"),
+            wins=int(participant.payoff / session.prize),
             completion_url=environ.get('OTREE_COMPLETION_URL'), 
         )
 page_sequence = [Page1, Page2, Page3, Page4, Page5, Page6, End]

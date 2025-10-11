@@ -23,14 +23,14 @@ def make_robots(stored=None):
     def robot_return():
         nonlocal stored
         if stored is not None:
-            return stored
-        stored = C.ROBOTS if isinstance(C.ROBOTS, dict) else {'all': C.ROBOTS}
-        stored = [stored.get('all', stored.get(player)) for player in range(1, C.PLAYERS_PER_GROUP + 1)]
-        return stored
+            return stored.copy()
+        stored = C.ROBOTS if isinstance(C.ROBOTS, dict) else {'default': C.ROBOTS}
+        stored = [stored.get(player, stored.get('default')) for player in range(1, C.PLAYERS_PER_GROUP + 1)]
+        return stored.copy()
     return robot_return
 robot_list = make_robots()
 def group_by_arrival_time_method(subsession, waiting_players):
-    robots = robot_list().copy()
+    robots = robot_list()
     if len(waiting_players) >= (C.PLAYERS_PER_GROUP - len(robots) + robots.count(None)):
         parts = subsession.session.get_participants()
         part = parts.pop(0)
