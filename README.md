@@ -3,10 +3,12 @@ Code for an [oTree](https://otree.readthedocs.io/en/latest/index.html) server to
 
 ![screenshot](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/advice.png?raw=true)
 
-**Installation:** This is the complete code for an app which could be [hosted on Heroku](https://otree.readthedocs.io/en/latest/server/heroku.html) (that's how we used it). You can establish OTREE_ADMIN_PASSWORD in Heroku Dashboard via Settings > Config Vars, then use that password to create a room when you access the app via its URL. Connecting this app to [Prolific](https://www.prolific.com/) required establishing OTREE_COMPLETION_URL in the same way (copied from your Prolific study) and copying the room URL into your Prolific study.
+## Installation
+This is the complete code for an app which could be [hosted on Heroku](https://otree.readthedocs.io/en/latest/server/heroku.html) (that's how we used it). You can establish OTREE_ADMIN_PASSWORD in Heroku Dashboard via Settings > Config Vars, then use that password to create a room when you access the app via its URL. Connecting this app to [Prolific](https://www.prolific.com/) required establishing OTREE_COMPLETION_URL in the same way (copied from your Prolific study) and copying the room URL into your Prolific study.
 
 To test locally, [install otree](https://github.com/oTree-org/otree-core) locally, download this project to a local folder, navigate your command prompt to that folder, and run `otree devserver`. When testing, it can be helpful to set `SKIP_PREGAME = True` in `Instructions/__init__.py` to skip straight to the game.
 
+## Player settings
 In `GroupPlayers`, it can be useful to adjust these constants:
 * `PLAYERS_PER_GROUP` (default `5`): The number of players (should be at least 5 for four buttons)
 * `WAIT_LIMIT` (default `1200`): Maximum seconds in the wait room before a player is automatically advanced to the alternate ending
@@ -31,38 +33,42 @@ The following table shows the average accumulated bonus in competitions between 
 
 `"{turntaking}"` would dominate any norm other than `"{equalize}"`;  `"{equalize}"` would dominate any norm other than `"{turntaking}"` or `"{caste}"` (although it becomes unstable against `"{rotate0}"`); `"{caste}"`, `"{random3}"`,  and `"{rotate0}"` are all very unstable due to internal inequity, but `"{caste}"` dominates `"{random3}"` and `"{random3}"` dominates `"{rotate0}"`; `"{rotate}"` ids dominated by the same opponents as `"{rotate0}"` but less extremely and performs well against itself; `"{random3}"` is dominated by all other norms in this comparison.
 
-In `MADChairs/__init__.py`, it can be useful to adjust these constants:
+## Game settings
+In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
+>>>>>>> 0652b6fcd43bbb2faebcd86868a1f3e53d6e8c25
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
-* `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number of buttons
-* `HIDE_SKIP` (default `True`): Hides the ability to skip the round
-* `MAX_HISTORY_DISPLAY` (default `8`): How many round of previous history to display 
+* `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
+* `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Allowing players to skip may help clarify when a player has simply given up, and many real-world situations permit players to skip. Players can raise their average payout by coordinating to use this option, so it makes ADVICE and CHAT more compelling. 
+* `ADVICE` (default `None`): What to display in the advice column of the history table (if anything). As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A".
+* `HIDE_CHAT` (default `True`): Hides the ability to chat with other players. Chat logs are stored separate from other data, but can be found on the main Data tab of oTree
 * `PRIZE` (default `cu(0.25)`): How many British pounds (or server currency) to award players who click a button no other player clicks
-* `PLAYER_LABEL` (default `'Player'`): The prefix for player ids (e.g. "Player1")
+* `MAX_HISTORY_DISPLAY` (default `8`): How many round of previous history to display 
+* `PLAYER_LABEL` (default `'Player'`): The prefix for player IDs (e.g. "Player1")
 * `ROBOT_LABEL` (default `'Bot'`): The prefix when players are replaced with robots (e.g. "Bot1")
 * `MAX_TIME` (default `120`): The maximum number of seconds per round
 * `BUFFER_INIT` (default `60`): How many seconds to remove from MAX_TIME if players do not request extra time
 * `TIMER_DISPLAY_AT` (default `30`): Allow players to request extra time when this many seconds remain
-* `TIMER_INCREMENT` (default v30`): How many more seconds to allow when players request extra time
-* `QUESTION_ROUNDS` (default `(2,)`): The rounds after which to ask users to describe their strategy
+* `TIMER_INCREMENT` (default `30`): How many seconds to add when players request extra time
+* `QUESTION_ROUNDS` (default `(2,)`): The round(s) after which to ask users to describe their strategy
 * `QUESTION_TIMER` (default `120`): The time limit (in seconds) for describing one's strategy
-* `HIDE_CHAT` (default `True`): Hides the ability to chat with other players
-* `ADVICE` (default `None`): What to display in the advice column of the history table. As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A". 
 
-Some special data columns of note:
+## Data
+Data can be exported in to Excel. Some special data columns of note:
 * `participant.skill_rating`: The participant's [trueskill](https://trueskill.org/) rating at the end of the game
 * `participant.disconnected`: `1` if the participant was disconnected
 * `participant.overwaited`: `1` if the participant never started (i.e. was in the waiting room too long)
-* `participant.payoff`: The participant's total winnings across all rounds.
-* `participant.robot`: The type of robot replacing this player.
+* `participant.payoff`: The participant's total winnings across all rounds
+* `participant.robot`: The type of robot replacing this player (if any)
 * `MADChairs.{round}.player.selection`: What the player selected in that {round}
+* `MADChairs.{round}.player.advice`: What advice was displayed to the player
 * `MADChairs.{round}.player.secondsElapsed`: How many seconds the player took to make their selection in that round
 * `MADChairs.{round}.player.payoff`: How much the player won in that {round}
 * `MADChairs.{round}.player.timedOut`: `1` if the player timed-out (so their selection was randomized in that round)
 * `MADChairs.{round}.player.debt`: Cumulative debt of favors owed to other players from the first round until that round
 * `MADChairs.{round}.player.skill_estimate`: The player's estimated skill based on performance in that and previous rounds
 * `MADChairs.{round}.player.strategy`: The player's description of their strategy
-* `MADChairs.{round}.player.advice`: What advice was displayed to the player
 
+## References
 You may want to use
 * [oTree HR](https://hr.otreehub.com/)
 * [Heroku dashboard](https://dashboard.heroku.com/apps)
