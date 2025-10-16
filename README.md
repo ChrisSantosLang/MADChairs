@@ -21,7 +21,7 @@ In `GroupPlayers`, it can be useful to adjust these constants:
   * `{obey}` will be replaced by whatever advice was given to that robot (see ADVICE below). If a positive integer N is appended (e.g. `{obey1}`) it will be relaced by the advice assigned to the player with ID N greater.
   * Invalid selections will be relaced with random valid selections.
 
-To specify different selections for different rounds, specify a sequence of selections through which to cycle like `("A", "B", "C")` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {4: "B"}}`, which would be equivalent to `{4: ("{obey}", "{obey}", "{obey}", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"default"`), and `"{obey}"` will be assumed for round 1 if no other selection is specified. As examples, `{3: {3: "D", 4: "D", 5: "{obey}"}, "default": "{obey}"} was used to run the following experiments with advice of `"{rotate}"`, `"{caste}"`, `"{equalize}"`, and `"{turntaking}"` to see the consequences of deviating from different kinds of advice:
+To specify different selections for different rounds, specify a sequence of selections through which to cycle like `("A", "B", "C")` or use an inner-dictionary to specify the round number in which to switch to a selection like `{4: {4: "B"}}`, which would be equivalent to `{4: ("{obey}", "{obey}", "{obey}", "B", "B", B", "B",`... When using an inner-dictionary, there must be an outer dictionary (which may require specifying `"default"`), and `"{obey}"` will be assumed for round 1 if no other selection is specified. As examples, `{3: {3: "D", 4: "D", 5: "{obey}"}, "default": "{obey}"}` was used to run the following experiments with advice of `"{rotate}"`, `"{caste}"`, `"{equalize}"`, and `"{turntaking}"` to see the consequences of deviating from different kinds of advice:
 
 ![Comparing turn-taking, equalize, and rotate2](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Robots.png?raw=true)
 
@@ -35,7 +35,6 @@ The following table shows the average accumulated bonus in competitions between 
 
 ## Game settings
 In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
->>>>>>> 0652b6fcd43bbb2faebcd86868a1f3e53d6e8c25
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
 * `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
 * `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Allowing players to skip may help clarify when a player has simply given up, and many real-world situations permit players to skip. Players can raise their average payout by coordinating to use this option, so it makes ADVICE and CHAT more compelling. 
