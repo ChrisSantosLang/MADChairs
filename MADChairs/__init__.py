@@ -41,6 +41,16 @@ def makeOptions(stored=None):
         return stored
     return inner
 playerOptions = makeOptions()
+def makeCasteStart(stored=None): 
+    def inner(num_players=0):
+        nonlocal stored
+        if stored is not None:
+            return stored
+        extra_options = [C.BUTTONS[-1] if C.HIDE_SKIP else 'skip'] * (num_players - len(C.BUTTONS)) 
+        stored = {index + 1: button for index, button in enumerate(list(C.BUTTONS) + extra_options)}
+        return stored
+    return inner
+casteStart = makeCasteStart()
 def random_selection(player=None, n=0):
     import random
     if (n < 1) or (player is None):
@@ -105,26 +115,19 @@ def group_by_arrival_time_method(subsession, waiting_players):
             group_vars.turnViolations = {id: 0 for id in range(1, len(group_vars.ids_in_group) + 1)}
             group_vars.casteViolations = {id: 0 for id in range(1, len(group_vars.ids_in_group) + 1)}
             group_vars.eqViolations = {id: 0 for id in range(1, len(group_vars.ids_in_group) + 1)}
+            group_vars.caste = casteStart(len(group_vars.ids_in_group)).copy()
+            group_vars.equalize = group_vars.caste.copy()
             extra_players = len(group_vars.ids_in_group) - len(C.BUTTONS)
-            extra_options = [C.BUTTONS[-1] if C.HIDE_SKIP else 'skip'] * extra_players 
-            group_vars.equalize = {index + 1: button for index, button in enumerate(list(C.BUTTONS) + extra_options)}
-            group_vars.caste = {index + 1: button for index, button in enumerate(list(C.BUTTONS) + extra_options)}
-            if C.HIDE_SKIP:
-                extra_options = [C.BUTTONS[0]] * extra_players
+            extra_options = [C.BUTTONS[0] if C.HIDE_SKIP else 'skip'] * extra_players 
             group_vars.turntaking = {index + 1: button for index, button in enumerate(extra_options + list(C.BUTTONS))}
             group_vars.session.prize = C.PRIZE
             group_vars.session.max_social = C.NUM_ROUNDS * C.PRIZE * (len(C.BUTTONS) - (1 if C.HIDE_SKIP else 0)) 
         return grouped
-def rotate(player, n=1, group_vars=None): 
-    now = player.round_number
-    ids = player.participant.ids_in_group
-    if not group_vars:
-        group_vars = [p for p in player.subsession.session.get_participants() if p.id_in_session == ids[0]][0]
-    if now == 1:
-        return group_vars.caste[player.id_in_group]
-    rotated_id = ids[(ids.index(player.participant.id_in_session) + n) % len(ids)]
-    rotated_player = [p for p in player.subsession.get_players() if p.participant.id_in_session == rotated_id][0]
-    return rotated_player.in_round(now - 1).selection
+def shift(player, amount):
+    if amount and int(amount) > 0:
+        players = player.group.get_players()
+        return players[(players.index(player) + int(amount)) % len(players)] 
+    return player
 def advice(player, adviceList=C.ADVICE):
     import re
     advice = ensure_list(strategy_list(adviceList))
@@ -132,11 +135,22 @@ def advice(player, adviceList=C.ADVICE):
     if not advice:
         return ""
     advice = str(advice)
-    group_vars = [p for p in player.subsession.session.get_participants() if p.id_in_session == player.participant.ids_in_group[0]][0]
-    if "{turntaking}" in advice:
-        advice = advice.format(turntaking=group_vars.turntaking[player.id_in_group])
-    if "{caste}" in advice:
-        advice = advice.format(caste=group_vars.caste[player.id_in_group])
+    group_vars = [p for id in player.participant.ids_in_group for p in player.subsession.session.get_participants() if id == p.id_in_session][0]
+    while True:
+        m = re.search(r'\{turntaking(\d*)\}', advice)
+        if m is None:
+            break
+        advice = advice.replace(m.group(0), group_vars.turntaking[shift(player, m.group(1)).id_in_group])
+    while True:
+        m = re.search(r'\{caste(\d*)\}', advice)
+        if m is None:
+            break
+        advice = advice.replace(m.group(0), group_vars.caste[shift(player, m.group(1)).id_in_group])
+    while True:
+        m = re.search(r'\{equalize(\d*)\}', advice)
+        if m is None:
+            break
+        advice = advice.replace(m.group(0), group_vars.equalize[shift(player, m.group(1)).id_in_group])
     while True:
         m = re.search(r'\{random(\d*)\}', advice)
         if m is None:
@@ -147,12 +161,14 @@ def advice(player, adviceList=C.ADVICE):
         m = re.search(r'\{rotate(\d*)\}', advice)
         if m is None:
             break
-        n = int(m.group(1)) if m.group(1) else 1
-        advice = advice.replace(m.group(0), rotate(player, n, group_vars=group_vars))
-    if "{obey}" in advice:
-        advice = advice.format(obey=player.field_maybe_none('advice'))
-    if "{equalize}" in advice:
-        advice = advice.format(equalize=group_vars.equalize[player.id_in_group])
+        rotation = (int(m.group(1)) if m.group(1) else 1) * (player.round_number - 1)
+        ids = group_vars.ids_in_group
+        advice = advice.replace(m.group(0), casteStart()[ids[(ids.index(player.participant.id_in_session) + rotation) % len(ids)]])
+    while True:
+        m = re.search(r'\{obey(\d*)\}', advice)
+        if m is None:
+            break
+        advice = advice.replace(m.group(0), shift(player, m.group(1)).field_maybe_none('advice'))
     return advice
 def name(player): 
     return (C.PLAYER_LABEL if player.participant.robot == "" else C.ROBOT_LABEL) + str(player.id_in_group)
@@ -177,7 +193,7 @@ def historyHTML(player, summary=False):
         history = p.in_all_rounds() if summary else p.in_previous_rounds()[-C.MAX_HISTORY_DISPLAY:]
         for hist in history:
             selection = [hist.selection]
-            if [p.in_round(hist.round_number).selection for p in players].count(hist.selection) > 1:
+            if hist.selection != "skip" and [p.in_round(hist.round_number).selection for p in players].count(hist.selection) > 1:
                 selection = ["("] + selection + [")"]      
             if not summary and p.id_in_group == player.id_in_group:
                 selection = ["<b>"] + selection + ["</b>"]
@@ -207,7 +223,7 @@ def historyHTML(player, summary=False):
     historyHTML.append("</table>") 
     if summary:
         historyHTML.extend(["<br><div style='text-align: center;'>Social utility=<b>", str(sum(payoffs))])
-        historyHTML.extend(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>Disparity=<b>", str(max(payoffs)-min(payoffs)),"</b></div>"])
+        historyHTML.extend(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>Disparity=<b>", str(max(payoffs)-min(payoffs)),"</b></div>"])      
     return "".join(historyHTML)
 def makeButtons(stored=None): 
     def inner():
