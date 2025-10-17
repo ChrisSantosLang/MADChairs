@@ -25,23 +25,23 @@ To specify different selections for different rounds, specify a sequence of sele
 
 ![Comparing turn-taking, equalize, and rotate2](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/Robots.png?raw=true)
 
-To deviate from `"{rotate}"` results in losses for the deviant and victims of collision. To deviate from `"{caste}"` also results in losses for the deviant and victims, and the deviant shifts to the bottom caste (a potentially endless loss). The losses dues to deviation from `"{equalize}"` are shared by the entire population (leaving no incentive against deviation). To deviate from `"{turntaking}"` results in losses for the deviant, and remaining losses are shared by the entire population. `"{turntaking}"` is the only norm the penalizes players who deviate when assigned to skip. 
+Deviation from `"{rotate}"` resulted in losses for the deviant and for victims of the collision. Deviation from `"{caste}"` additionally shifted the deviant to the bottom caste (a potentially endless loss). The losses due to deviation from `"{equalize}"` were distributed (as equally as possible) accross the entire population (leaving no incentive against deviation). Deviation from `"{turntaking}"` resulted in losses for the deviant, and remaining losses were distributed accross the entire population. `"{turntaking}"` is the only norm to directly penalize players who deviate when advised to skip. 
 
-The following table shows the average % of maximum bonus accumulated in a team of three bots competing for five buttons against another team of three bots that occupied the even slots and played as specified in the column label. Italic numbers represent situations in which players had incentive to defect either because they were suppressed by their teammates (red) or achieved significantly lower bonuses than their opponents.  
+The following table shows the average portion of maximum bonus accumulated in a team of three bots the occupied the odd positions (playing as specified in the row label) competing for five buttons against another team of three bots that occupied the even positions (and played as specified in the column label). Italic numbers represent situations in which players had incentive to defect either because they were suppressed by their teammates (red) or achieved significantly lower bonuses than their opponents.  
 
 ![Comparing norms by mixing equal populations](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/mixes.png?raw=true)
 
-`"{turntaking}"` dominated every norm other than `"{equalize}"`. `"{equalize}"` dominated `"{random3}"` which dominated `"{rotate}"` which dominated `"{equalize}"`. `"{caste}"`, `"{random3}"`,  and `"{rotate0}"` all proved very unstable due to internal inequity, but `"{caste}"` was the least-often dominated. `"{random}"` was dominated by all other norms in this comparison.
+`"{turntaking}"` dominated every norm other than `"{equalize}"`. `"{equalize}"` dominated `"{random3}"` which dominated `"{rotate}"` which dominated `"{equalize}"`. `"{caste}"`, `"{random3}"`,  and `"{rotate0}"` all proved very unstable due to internal inequity, but `"{caste}"` was less-often dominated than the other two. `"{random}"` was dominated by all other norms in this comparison.
 
 ## Game settings
 In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
 * `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
-* `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Allowing players to skip may help clarify when a player has simply given up, and many real-world situations permit players to skip. Players can raise their average payout by coordinating to use this option, so it makes ADVICE and CHAT more compelling. 
+* `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Many real-world situations permit players to skip. Players can raise their average payout by coordinating to use this option, so it makes ADVICE and CHAT more compelling. 
 * `ADVICE` (default `None`): What to display in the advice column of the history table (if anything). As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A".
-* `HIDE_CHAT` (default `True`): Hides the ability to chat with other players. Chat logs are stored separate from other data, but can be found on the main Data tab of oTree
+* `HIDE_CHAT` (default `True`): Hides the ability to chat with other players. Chat logs can be found on the main Data tab of oTree
 * `PRIZE` (default `cu(0.25)`): How many British pounds (or server currency) to award players who click a button no other player clicks
-* `MAX_HISTORY_DISPLAY` (default `8`): How many round of previous history to display 
+* `MAX_HISTORY_DISPLAY` (default `8`): How many rounds of previous history to display 
 * `PLAYER_LABEL` (default `'Player'`): The prefix for player IDs (e.g. "Player1")
 * `ROBOT_LABEL` (default `'Bot'`): The prefix when players are replaced with robots (e.g. "Bot1")
 * `MAX_TIME` (default `120`): The maximum number of seconds per round
@@ -52,16 +52,16 @@ In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `QUESTION_TIMER` (default `120`): The time limit (in seconds) for describing one's strategy
 
 ## Data
-Data can be exported in to Excel. Some special data columns of note:
+Data can be exported in Excel format. Some special data columns of note:
 * `participant.skill_rating`: The participant's [trueskill](https://trueskill.org/) rating at the end of the game
 * `participant.disconnected`: `1` if the participant was disconnected
-* `participant.overwaited`: `1` if the participant never started (i.e. was in the waiting room too long)
+* `participant.overwaited`: `1` if the participant advanced th the alternate ending because theyr were in the waiting room too long
 * `participant.payoff`: The participant's total winnings across all rounds
 * `participant.robot`: The type of robot replacing this player (if any)
-* `MADChairs.{round}.player.selection`: What the player selected in that {round}
-* `MADChairs.{round}.player.advice`: What advice was displayed to the player
+* `MADChairs.{round}.player.selection`: What the player selected in that round
+* `MADChairs.{round}.player.advice`: What advice was displayed to the player (if any)
 * `MADChairs.{round}.player.secondsElapsed`: How many seconds the player took to make their selection in that round
-* `MADChairs.{round}.player.payoff`: How much the player won in that {round}
+* `MADChairs.{round}.player.payoff`: How much the player won in that round
 * `MADChairs.{round}.player.timedOut`: `1` if the player timed-out (so their selection was randomized in that round)
 * `MADChairs.{round}.player.debt`: Cumulative debt of favors owed to other players from the first round until that round
 * `MADChairs.{round}.player.skill_estimate`: The player's estimated skill based on performance in that and previous rounds
