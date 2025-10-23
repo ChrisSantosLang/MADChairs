@@ -73,3 +73,4 @@ You may want to use
 * [Heroku dashboard](https://dashboard.heroku.com/apps)
 * [oTree depository](https://github.com/oTree-org/otree-core)
 * [oTree documentation](https://otree.readthedocs.io/en/latest/index.html)
+* To include LLMs: [Botex](https://github.com/trr266/botex), [Alter ego](https://github.com/mrpg/ego)
