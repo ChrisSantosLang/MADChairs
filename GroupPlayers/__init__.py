@@ -30,6 +30,9 @@ def make_robots(stored=None):
     return robot_return
 robot_list = make_robots()
 def group_by_arrival_time_method(subsession, waiting_players):
+    ids = waiting_players[0].participant.vars.get('ids_in_group')
+    if ids:
+        return [p._get_current_player() for id in ids for p in subsession.session.get_participants() if p.id_in_session == id]
     robots = robot_list()
     if len(waiting_players) >= (C.PLAYERS_PER_GROUP - len(robots) + robots.count(None)):
         parts = subsession.session.get_participants()
@@ -42,7 +45,7 @@ def group_by_arrival_time_method(subsession, waiting_players):
             players.append(player)
             if robots:
                 robot = robots.pop(0)
-        while len(players) < C.PLAYERS_PER_GROUP:    
+        while len(players) < C.PLAYERS_PER_GROUP: 
             if robot is None:
                 player = waiting_players.pop(0)
                 player.participant.robot = ""

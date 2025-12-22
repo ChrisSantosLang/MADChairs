@@ -5,7 +5,7 @@ LANGUAGE_CODE = 'en'
 REAL_WORLD_CURRENCY_CODE = 'GBP'
 USE_POINTS = False
 DEMO_PAGE_INTRO_HTML = ''
-PARTICIPANT_FIELDS = ['time', 'skill_rating', 'disconnected', 'disconnectChecked', 'finished', 'wait_seconds', 'ids_in_group', 'robot', 'overwaited', 'popularity', 'turntaking', 'caste', 'equalize', 'turnViolations', 'casteViolations', 'eqViolations']
+PARTICIPANT_FIELDS = ['time', 'skill_rating', 'disconnected', 'disconnectChecked', 'finished', 'wait_seconds', 'ids_in_group', 'robot', 'overwaited', 'popularity', 'turntaking', 'caste', 'equalize', 'radicaleq', 'turnViolations', 'casteViolations', 'eqViolations']
 SESSION_FIELDS = ['prolific_completion_url', 'prize', 'max_social']
 ROOMS = [dict(name='mc', display_name='mc')]
 

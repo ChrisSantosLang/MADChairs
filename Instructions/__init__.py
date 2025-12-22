@@ -22,7 +22,7 @@ def creating_session(subsession: Subsession):
             part = player.participant
             part.time = time.time()
             part.robot = ""
-            part.skill_rating = trueskill.Rating(mu=25, sigma=1.7)
+            part.skill_rating = trueskill.Rating(mu=25, sigma=0.5)
             part.disconnected = False
             part.overwaited = False
 class Start(Page):
