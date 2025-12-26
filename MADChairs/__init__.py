@@ -189,7 +189,7 @@ def advice(player, adviceList=C.ADVICE):
             break
         rotation = (int(m.group(1)) if m.group(1) else 1) * (player.round_number - 1)
         ids = group_vars.ids_in_group
-        advice = advice.replace(m.group(0), casteStart()[ids[(ids.index(player.participant.id_in_session) + rotation) % len(ids)]])
+        advice = advice.replace(m.group(0), casteStart()[((ids.index(player.participant.id_in_session) + rotation) % len(ids)) + 1])
     while True:
         m = re.search(r'\{obey(\d*)\}', advice)
         if m is None:
