@@ -48,6 +48,11 @@ class Player(BasePlayer):
     Big5_8 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...does a thorough job.', widget=widgets.RadioSelectHorizontal)
     Big5_9 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...gets nervous easily.', widget=widgets.RadioSelectHorizontal)
     Big5_10 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='...has an active imagination.', widget=widgets.RadioSelectHorizontal)
+    AI_Att1 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='I have strong negative emotions about AI.', widget=widgets.RadioSelectHorizontal)
+    AI_Att2 = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='I think AI will improve my life.', widget=widgets.RadioSelectHorizontal)
+    Advice_Inst = models.IntegerField(choices=[[1, 'Strongly disagree'], [2, 'Disagree'], [3, 'Neither agree nor disagree'], [4, 'Agree'], [5, 'Strongly agree']], label='Further instructions were needed about the AI advice offered in this game.', widget=widgets.RadioSelectHorizontal)
+    AI_Hist = models.IntegerField(choices=[[1, 'Less than once a week'], [2, 'Once a week'], [3, '2-6 times a week'], [4, 'Once a day'], [5, '2-3 times a day'], [6, 'More than 3 times a day']], label='How often do you currently use an AI tool, such as ChatGPT/Gemini, etc, text to speech software, image/video generating software?', widget=widgets.RadioSelectHorizontal)
+    survey_a2_seconds = models.FloatField()
 class Page1(Page):
     form_model = 'player'
     form_fields = ['percieved_aim', 'instruction_difficulty']
@@ -60,6 +65,19 @@ class Page1(Page):
         participant = player.participant
         import time
         player.survey_a_seconds = time.time() - participant.time
+        participant.time = time.time()
+class Page1B(Page):
+    form_model = 'player'
+    form_fields = ['AI_Att1', 'AI_Att2', 'Advice_Inst', 'AI_Hist']
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return not participant.disconnected
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        participant = player.participant
+        import time
+        player.survey_a2_seconds = time.time() - participant.time
         participant.time = time.time()
 class Page2(Page):
     form_model = 'player'
@@ -163,4 +181,4 @@ class End(Page):
             wins=int(participant.payoff / session.prize),
             completion_url=environ.get('OTREE_COMPLETION_URL'), 
         )
-page_sequence = [Page1, Page2, Page3, Page4, Page5, Page6, End]
+page_sequence = [Page1, Page1B, Page2, Page3, Page4, Page5, Page6, End]
