@@ -87,23 +87,6 @@ def random_selection(player=None, n=0):
             options = C.BUTTONS
         return random.choice(options)
     return player.in_round(player.round_number - 1).selection
-def live_update(player: Player, data):
-    group = player.group
-    participant = player.participant
-    import time
-    if "round" in data and data["round"] != player.round_number:
-        return {player.id_in_group: None}
-    participant.disconnected = False
-    if "extended" in data:
-        return {player.id_in_group: None}
-    player.secondsElapsed = time.time() - participant.time
-    if "selected" in data and data["selected"] in playerOptions():
-        player.selection = data["selected"]
-        player.timedOut = False
-    elif "timeout" in data:
-        player.timedOut = True
-        player.selection = random_selection()
-    return {player.id_in_group: "selection_made"}
 def ensure_list(data):
     if isinstance(data, (tuple,list)):	
         return list(data)
@@ -284,7 +267,24 @@ class MADChairsWaitPage(WaitPage):
     group_by_arrival_time = True
 class MADChairs(Page):
     form_model = 'player'
-    live_method = 'live_update'
+    @staticmethod
+    def live_method(player: Player, data):
+        group = player.group
+        participant = player.participant
+        import time
+        if "round" in data and data["round"] != player.round_number:
+            return {player.id_in_group: None}
+        participant.disconnected = False
+        if "extended" in data:
+            return {player.id_in_group: None}
+        player.secondsElapsed = time.time() - participant.time
+        if "selected" in data and data["selected"] in playerOptions():
+            player.selection = data["selected"]
+            player.timedOut = False
+        elif "timeout" in data:
+            player.timedOut = True
+            player.selection = random_selection()
+        return {player.id_in_group: "selection_made"}
     @staticmethod
     def is_displayed(player: Player):
         participant = player.participant
