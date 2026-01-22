@@ -183,7 +183,7 @@ def advice(player, adviceList=C.ADVICE):
 def name(player): 
     return (C.PLAYER_LABEL if player.participant.robot == "" else C.ROBOT_LABEL) + str(player.id_in_group)
 def historyHTML(player, summary=False): 
-    historyHTML = ["<table><tr><td style='width: 110pt'>"]
+    historyHTML = ["<div id='tooltip' style='display: none'><div>", C.ADVICE_INFO, "</div><br></div><table><tr><td style='width: 110pt'>"]
     players = [p for id in player.participant.ids_in_group for p in player.subsession.get_players() if p.participant.id_in_session == id]
     historyCap = maxHistory()[player.round_number]
     if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
@@ -193,8 +193,7 @@ def historyHTML(player, summary=False):
             historyHTML.extend(["</td><td style='text-align: center;'><b>", str(hist.round_number), "</b>"])
     historyHTML.extend(["</td><td style='width: 60pt; text-align: center;'><b>Bonus</b></td><td></td>"])
     if not summary and player.advice != "":
-        historyHTML.extend(["<td style='text-align: center;'><b>Advice</b> <span style='cursor:pointer' title='", 
-            C.ADVICE_INFO, "'>(<u>info</u>)</span></td>"])
+        historyHTML.extend(["<td style='text-align: center;'><b>Advice</b> <span id='infolink' style='cursor:pointer' onclick='toggleToolTip(event)'>(<u>info</u>)</span></td>"])
     historyHTML.append("</tr>")
     payoffs = []
     # team_one = []
@@ -212,7 +211,10 @@ def historyHTML(player, summary=False):
             if hist.timedOut:
                 selection = ["<i>"] + selection + ["</i>"]
             if not summary and hist.advice in playerOptions():
-                selection = selection + ["(", hist.advice, ")"]
+                if hist.selection == hist.advice:
+                    selection = selection + ["<span style='color: green; font-size: 0.8rem'>(", hist.advice, ")</span>"]
+                else:
+                    selection = selection + ["<span style='color: red; font-size: 0.8rem'>(", hist.advice, ")</span>"]
             if not summary and p.id_in_group == player.id_in_group:
                 selection = ["<b>"] + selection + ["</b>"]
             historyHTML.extend(["<td style='text-align: center;'> &nbsp;"] + selection + ["&nbsp;</td>"])
