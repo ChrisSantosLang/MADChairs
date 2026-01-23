@@ -212,7 +212,7 @@ def historyHTML(player, summary=False):
                 selection = ["<i>"] + selection + ["</i>"]
             if not summary and hist.advice in playerOptions():
                 if hist.selection == hist.advice:
-                    selection = selection + ["<span style='color: green; font-size: 0.8rem'>(", hist.advice, ")</span>"]
+                    selection = selection + ["<span style='font-size: 0.8rem'>(", hist.advice, ")</span>"]
                 else:
                     selection = selection + ["<span style='color: red; font-size: 0.8rem'>(", hist.advice, ")</span>"]
             if not summary and p.id_in_group == player.id_in_group:
