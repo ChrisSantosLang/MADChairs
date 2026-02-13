@@ -5,11 +5,11 @@ doc = ''
 class C(BaseConstants):
     NAME_IN_URL = 'MADChairs'
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 20
+    NUM_ROUNDS = 25
     BUFFER_INIT = 60
     TIMER_INCREMENT = 30
     MAX_TIME = 120
-    MAX_HISTORY_DISPLAY = {1:8, 16:8}
+    MAX_HISTORY_DISPLAY = {1:8, 21:8}
     PLAYER_LABEL = 'Player'
     ROBOT_LABEL = 'Bot'
     BUTTONS = ('A', 'B', 'C', 'D')
@@ -17,7 +17,7 @@ class C(BaseConstants):
     QUESTION_ROUNDS = (2,)
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
-    ADVICE = {1:'{turntaking}', 16: None}
+    ADVICE = {1:'{turntaking}', 21: None}
     HIDE_CHAT = True
     HIDE_SKIP = True
     ADVICE_INFO = "The advice always suggests choices that achieve the highest group efficiency (the highest aggregate payoff) and minimize inequality. This is the best-performing advice we have encountered. It is possible that you may achieve a greater bonus - if you and others do not follow this advice - but it optimizes outcomes only for those who follow the advice."
