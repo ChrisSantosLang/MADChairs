@@ -1,14 +1,14 @@
 # MADChairs
-Code for an [oTree](https://otree.readthedocs.io/en/latest/index.html) server to play the [MAD Chairs game](https://arxiv.org/abs/2503.20986) (a.k.a. the [Lifeboat Problem](https://www.sciencedirect.com/science/article/pii/S0014292111001231?casa_token=Lk71pF1iix4AAAAA:4tvPXdyzSc6Nh0UzddxhizMqx3xNA1U7PSeArEcQvWUUD32aH2duyonpB1DqeHfiBXhw-7Vy4i4)). This game is a metaphor for real-world division of scarce resources including division of jobs, hospital beds, and spaces in traffic. One important application is the division of opportunity to have voice in a conversation. Representative democracies, for example, explicitly establish a limited set of channels through which citizens can have voice in their government, and any of those channels can be overcrowded. 
+Code for an [oTree](https://otree.readthedocs.io/en/latest/index.html) server to play the [MAD Chairs game](https://arxiv.org/abs/2503.20986) (a.k.a. the [Lifeboat Problem](https://www.sciencedirect.com/science/article/pii/S0014292111001231?casa_token=Lk71pF1iix4AAAAA:4tvPXdyzSc6Nh0UzddxhizMqx3xNA1U7PSeArEcQvWUUD32aH2duyonpB1DqeHfiBXhw-7Vy4i4)) and [Kokata Paise Restaurant Problem](https://en.wikipedia.org/wiki/Kolkata_Paise_Restaurant_Problem). Such games are a metaphor for real-world division of scarce resources including division of jobs, hospital beds, and spaces in traffic. One important application is the division of opportunity to have voice in a conversation. Representative democracies, for example, explicitly establish a limited set of channels through which citizens can have voice in their government, and any of those channels can be overcrowded. 
 
 ![screenshot](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/advice.png?raw=true)
 
-The "Advice" column in the bottom section is optional (and can show each player multiple recommendations). Each previous selection is followed by what was advised (in parentheses) to that player for that round and is underlined if no other player clicked the same button in that round. The "Bonus" column displays each player's accumulated winnings thus far.
+The "Advice" column in the bottom section of the screenshot above is optional and adjustable. Each previous selection is followed by what was advised (in parentheses) to that player for that round and is underlined if no other player clicked the same button in that round. The "Bonus" column displays each player's accumulated winnings thus far. 
 
 ## Installation
 This is the complete code for an app which could be [hosted on Heroku](https://otree.readthedocs.io/en/latest/server/heroku.html) (that's [how we used it](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5599171)). You can establish OTREE_ADMIN_PASSWORD in Heroku Dashboard via Settings > Config Vars, then use that password to create a room when you access the app via its URL. Connecting this app to [Prolific](https://www.prolific.com/) required establishing OTREE_COMPLETION_URL in the same way (copied from your Prolific study) and copying the room URL into your Prolific study.
 
-To test locally, [install otree](https://github.com/oTree-org/otree-core) locally, download this project to a local folder, navigate your command prompt to that folder, and run `otree devserver`. When testing, it can be helpful to set `SKIP_PREGAME = True` in `Instructions/__init__.py` to skip straight to the game.
+To test locally, [install otree](https://github.com/oTree-org/otree-core) locally, download this project to a local folder, navigate your command prompt to that folder, and run `otree devserver`. When testing, it can be helpful to set `SKIP_PREGAME = True` in `Instructions/__init__.py` to skip straight to the game. A local installation is sufficient to run AI tournaments to establish grandmaster strategies as [here](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6194078).
 
 ## Player settings
 In `GroupPlayers`, it can be useful to adjust these constants:
@@ -38,12 +38,12 @@ For this analysis, we use the term "edge" to refer to the minimum bonus achieved
 
 `"{turntaking}"`, like most of the strategies, achieve 83% of the maximum possible bonus when no other strategy is played. While waiting for other players to defect to their strategy, the average turn-taker achieves as good or higher bonus than non-turn-takers. However, the implementation of `"{turntaking}"`, `"{caste}"`, and `"{equalize}"` require accounting that may be impractical without the help of a computer. 
 
+## Game settings
+In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `KOLKATA_PAISE` (default `False`): To address concern that some real-world examples of scarce-resource division have external forces that limit waste (e.g., an employer resolves competition over a job by picking one winner), you can set `HIDE_SKIP = False` and `KOLKATA_PAISE = True`. That switches the game to the [Kolkata Paise Restaurant Problem](https://en.wikipedia.org/wiki/Kolkata_Paise_Restaurant_Problem), confirming that `"{turntaking}"` remains the grandmaster strategy even if each collision gets one winner.
 
 ![3 vs 3 KPR tournament results, 20 matches/pairing](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/KPR.png?raw=true)
 
-## Game settings
-In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
 * `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
 * `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Many real-world situations permit players to skip. Players can raise their average payout by coordinating about skipping, so the option to skip makes ADVICE and CHAT more compelling. 
