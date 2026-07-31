@@ -46,6 +46,7 @@ For this analysis, we use the term "edge" to refer to the minimum bonus achieved
 In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
 * `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
+* `SORT_HISTORY` (default `False`): Sorts the history like a leaderboard with the highest Bonus on top. 
 * `HIDE_SKIP` (default `True`): Hides the ability to skip the round. Many real-world situations permit players to skip. Players can raise their average payout by coordinating about skipping, so the option to skip makes ADVICE and CHAT more compelling. 
 * `ADVICE` (default `None`): What to display in the advice column of the history table (if anything). As with ROBOTS, a cycle or dictionary can be used to specify different advice in different rounds. For example, `{8: "Turn={turntaking}; Caste={caste}", 17: None}` would display the turn-taking and caste selections in rounds 8-16 formatted like "Turn=B; Caste=A".
 * `HIDE_CHAT` (default `True`): Hides the ability to chat with other players. Chat logs can be found on the main Data tab of oTree

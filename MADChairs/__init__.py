@@ -18,6 +18,7 @@ class C(BaseConstants):
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     ADVICE = {1:'{turntaking}', 21: None}
+    SORT_HISTORY = False
     HIDE_CHAT = True
     HIDE_SKIP = True
     ADVICE_INFO = "The advice always suggests choices that achieve the highest group efficiency (the highest aggregate payoff) and minimize inequality. This is the best-performing advice we have encountered. It is possible that you may achieve a greater bonus - if you and others do not follow this advice - but it optimizes outcomes only for those who follow the advice."
@@ -185,6 +186,8 @@ def name(player):
 def historyHTML(player, summary=False): 
     historyHTML = ["<div id='tooltip' style='display: none'><div>", C.ADVICE_INFO, "</div><br></div><table><tr><td style='width: 110pt'>"]
     players = [p for id in player.participant.ids_in_group for p in player.subsession.get_players() if p.participant.id_in_session == id]
+    if C.SORT_HISTORY:
+        players = sorted(players, key=lambda p: sum([hist.payoff for hist in p.in_all_rounds()]), reverse=True)
     historyCap = maxHistory()[player.round_number]
     if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
         historyHTML.extend(["<b>Previous rounds:</b>"])
