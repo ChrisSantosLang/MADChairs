@@ -25,6 +25,7 @@ def creating_session(subsession: Subsession):
             part.skill_rating = trueskill.Rating(mu=25, sigma=0.5)
             part.disconnected = False
             part.overwaited = False
+            part.showColumns = False
 class Start(Page):
     form_model = 'player'
     timeout_seconds = 0.1

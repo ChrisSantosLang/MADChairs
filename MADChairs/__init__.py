@@ -18,10 +18,50 @@ class C(BaseConstants):
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     ADVICE = {1:'{turntaking}', 21: None}
-    SORT_HISTORY = False
+    SORT_HISTORY = True
     HIDE_CHAT = True
     HIDE_SKIP = True
-    ADVICE_INFO = "The advice always suggests choices that achieve the highest group efficiency (the highest aggregate payoff) and minimize inequality. This is the best-performing advice we have encountered. It is possible that you may achieve a greater bonus - if you and others do not follow this advice - but it optimizes outcomes only for those who follow the advice."
+    ADVICE_INFO = ["""You are the only player advised to <b>click {advice}</b> for this round. It is your turn to benefit from a unique button.""",
+        """You are not advised to click a unique button this round. This is due to recent deviations from the advice. 
+    Following the advice can get you back to be advised unique buttons.""",
+        """You are not advised to click a unique button this round. This is to give others a turn at winning, 
+    but you will be assigned future turns if you follow the advice.""",
+        """The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
+    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
+    but it also decreases by 30% each round, so previous deviations become forgotten. 
+    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
+    so everyone would take turns winning if everyone followed the advice.<br><br>
+    We chose the advice algorithm for this study in the same way chess machines are developed: 
+    We ran tournaments between the best potential algorithms we could find. 
+    Players who followed the advice given in this study achieved the best outcomes for themselves. 
+    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
+    Deviation tends to harm both oneself and any other player with whom one collides.""",
+        """Your "owed" is {owed}. That is what you stand to collect by getting your "deviated" below 1. 
+    Your "deviated" is currently {deviated}, so you would need to lose {penalty} round(s) before
+    the advice will start assigning you what you are owed.<br><br>
+    The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
+    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
+    but it also decreases by 30% each round, so previous deviations become forgotten. 
+    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
+    so everyone would take turns winning if everyone followed the advice.<br><br>
+    We chose the advice algorithm for this study in the same way chess machines are developed: 
+    We ran tournaments between the best potential algorithms we could find. 
+    Players who followed the advice given in this study achieved the best outcomes for themselves. 
+    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
+    Deviation tends to harm both oneself and any other player with whom one collides """,
+        """Your "owed" is {owed}, which is not higher than other players, 
+    but it will go up and theirs will go down if you lose this round and they win.<br><br>
+    The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
+    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
+    but it also decreases by 30% each round, so previous deviations become forgotten. 
+    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
+    so everyone would take turns winning if everyone followed the advice.<br><br>
+    We chose the advice algorithm for this study in the same way chess machines are developed: 
+    We ran tournaments between the best potential algorithms we could find. 
+    Players who followed the advice given in this study achieved the best outcomes for themselves. 
+    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
+    Deviation tends to harm both oneself and any other player with whom one collides."""
+    ]
     KOLKATA_PAISE = False
 class Subsession(BaseSubsession):
     pass
@@ -35,6 +75,7 @@ class Player(BasePlayer):
     debt = models.FloatField(initial=0)
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
     advice = models.StringField(blank=True)
+    soughtInfo = models.BooleanField(initial=False)
 def makeMaxHistory(stored=None): 
     def inner():
         nonlocal stored
@@ -134,10 +175,12 @@ def shift(player, amount):
         players = player.group.get_players()
         return players[(players.index(player) + int(amount)) % len(players)] 
     return player
+def adviceType(player, adviceList=C.ADVICE):
+    advice = ensure_list(strategy_list(adviceList))
+    return advice[(player.round_number-1) % len(advice)] 
 def advice(player, adviceList=C.ADVICE):
     import re
-    advice = ensure_list(strategy_list(adviceList))
-    advice = advice[(player.round_number-1) % len(advice)]
+    advice = adviceType(player, adviceList)
     if not advice:
         return ""
     advice = str(advice)
@@ -184,28 +227,73 @@ def advice(player, adviceList=C.ADVICE):
 def name(player): 
     return (C.PLAYER_LABEL if player.participant.robot == "" else C.ROBOT_LABEL) + str(player.id_in_group)
 def historyHTML(player, summary=False): 
-    historyHTML = ["<div id='tooltip' style='display: none'><div>", C.ADVICE_INFO, "</div><br></div><table><tr><td style='width: 110pt'>"]
     players = [p for id in player.participant.ids_in_group for p in player.subsession.get_players() if p.participant.id_in_session == id]
     if C.SORT_HISTORY:
         players = sorted(players, key=lambda p: sum([hist.payoff for hist in p.in_all_rounds()]), reverse=True)
+    group_vars = [p for id in player.participant.ids_in_group for p in player.subsession.session.get_participants() if id == p.id_in_session][0]
     historyCap = maxHistory()[player.round_number]
+    readMore = ""
+    if isinstance(C.ADVICE_INFO, list) and "turntaking" in str(adviceType(player)):
+        readMore = " <span id='infolink' style='cursor:pointer' onclick='readMore(event)'><u>Read more</u></span>"
+        more = ""
+        if len(C.ADVICE_INFO) > 0 and player.advice != "skip" and [p.advice for p in players].count(player.advice) < 2:
+            historyHTML = ["<div>", C.ADVICE_INFO[0].replace("{advice}", player.advice)]
+            if len(C.ADVICE_INFO) > 3:
+                more = C.ADVICE_INFO[3] 
+        else:
+            deviated = round(group_vars.turnViolations[player.id_in_group], 2)
+            penalty = max([p[0] for p in ((0, -1), (1, 1), (2, 1.42), (3, 2.04), (4, 2.92)) if deviated > p[1]])
+            owed = "0.0"
+            if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
+                owed = round(player.in_previous_rounds()[-1].debt * -17.5, 1)
+            if group_vars.turnViolations[player.id_in_group] >= 1:
+                historyHTML = ["<div>", C.ADVICE_INFO[1].replace("{advice}", player.advice)]
+                if len(C.ADVICE_INFO) > 4:
+                    more = C.ADVICE_INFO[4].replace("{owed}", str(owed)).replace("{deviated}", f"{deviated:.2f}").replace("{penalty}", str(penalty))
+            else:
+                historyHTML = ["<div>", C.ADVICE_INFO[2].replace("{advice}", player.advice)]
+                if len(C.ADVICE_INFO) > 5:
+                    more = C.ADVICE_INFO[5].replace("{owed}", str(owed)).replace("{deviated}", f"{deviated:.2f}").replace("{penalty}", str(penalty))
+        if len(more) > 0:
+            historyHTML.extend([readMore, "</div><br><div class='hidden' style='display: none'><div>", more, "</div><br>"])
+            if player.participant.showColumns:
+                historyHTML.extend("</div><input type='checkbox' id='showColumns' checked onclick='boxClicked()'> <label for='showColumns'>Always show Owed and Deviated</label><br><br>")
+            else:
+                historyHTML.extend("<input type='checkbox' id='showColumns' onclick='boxClicked()'> <label for='showColumns'>Always show Owed and Deviated</label><br><br></div>")
+        else: 
+            historyHTML.extend(["</div><br>"])
+    else:
+        historyHTML = ["<div class='hidden' style='display: none'><div>", str(C.ADVICE_INFO), "</div><br></div>"]
+    historyHTML.extend(["<table><tr><td style='width: 110pt'>"])
+
     if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
         historyHTML.extend(["<b>Previous rounds:</b>"])
         history = players[0].in_all_rounds() if summary else players[0].in_previous_rounds()[-historyCap:]
         for hist in history:
             historyHTML.extend(["</td><td style='text-align: center;'><b>", str(hist.round_number), "</b>"])
-    historyHTML.extend(["</td><td style='width: 60pt; text-align: center;'><b>Bonus</b></td><td></td>"])
+    historyHTML.extend(["</td><td style='width: 60pt; text-align: center;'><b>Bonus</b></td>"])
+    if player.participant.showColumns:
+        historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center;'><b>Owed</b></td>"])
+        historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center;'><b>Deviated</b></td><td></td>"])
+    else:
+        historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center; display: none;'><b>Owed</b></td>"])
+        historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center; display: none;'><b>Deviated</b></td><td></td>"])
     if not summary and player.advice != "":
-        historyHTML.extend(["<td style='text-align: center;'><b>Advice</b> <span id='infolink' style='cursor:pointer' onclick='toggleToolTip(event)'>(<u>info</u>)</span></td>"])
+        historyHTML.append("<td style='text-align: center;'><b>Advice</b>")
+        if len(readMore) < 1:
+            historyHTML.append(" <span id='infolink' style='cursor:pointer' onclick='readMore(event)'>(<u>info</u>)</span>") 
+        historyHTML.append("</td>")
     historyHTML.append("</tr>")
     payoffs = []
     # team_one = []
     # team_two = []
     for p in players:
-        if not summary and p.id_in_group == player.id_in_group:
-            historyHTML.extend(["<tr><td style='width: 110pt'><b>", name(p), " (Me)</b></td>"])
+        boldRow = not summary and p.id_in_group == player.id_in_group
+        historyHTML.append("<tr><td style='width: 110pt'>")
+        if boldRow:
+            historyHTML.extend(["<b>", name(p), " (Me)</b>"])
         else:
-            historyHTML.extend(["<tr><td style='width: 110pt'>", name(p), "</td>"])
+            historyHTML.append(name(p))
         history = p.in_all_rounds() if summary else (p.in_previous_rounds()[-historyCap:] if historyCap > 0 else [])
         for hist in history:
             selection = [hist.selection]
@@ -215,36 +303,60 @@ def historyHTML(player, summary=False):
                 selection = ["<i>"] + selection + ["</i>"]
             if not summary and hist.advice in playerOptions():
                 if hist.selection == hist.advice:
-                    selection = selection + ["<span style='font-size: 0.8rem'>(", hist.advice, ")</span>"]
+                    selection.extend(["<span style='font-size: 0.8rem'>(", hist.advice, ")</span>"])
                 else:
-                    selection = selection + ["<span style='color: red; font-size: 0.8rem'>(", hist.advice, ")</span>"]
-            if not summary and p.id_in_group == player.id_in_group:
-                selection = ["<b>"] + selection + ["</b>"]
-            historyHTML.extend(["<td style='text-align: center;'> &nbsp;"] + selection + ["&nbsp;</td>"])
-        timeouts = sum([int(hist.timedOut) for hist in p.in_all_rounds()])
+                    selection.extend(["<span style='color: red; font-size: 0.8rem'>(", hist.advice, ")</span>"])
+            if boldRow: 
+                selection = ["<b>"] + selection + ["</b>"]  
+            historyHTML.extend(["</td><td style='text-align: center;'> &nbsp;"] + selection + ["&nbsp;"])
+
         total_payoff = sum([hist.payoff for hist in p.in_all_rounds()])
         payoffs.append(total_payoff)
         # if p.id_in_group in (1, 3, 5):
         #     team_one.append(total_payoff)
         # else:
         #     team_two.append(total_payoff)
-        if not summary and p.id_in_group == player.id_in_group:
-            historyHTML.extend(["<td style='width: 60pt; text-align: center;'><b>", str(total_payoff), "</b></td>"])
+        bonus = [str(total_payoff)]
+        if boldRow:
+            bonus = ["<b>"] + bonus + ["</b>"]
+        historyHTML.extend(["</td><td style='width: 60pt; text-align: center;'>", "".join(bonus), "</td><td class='hidden' style='width: 60pt; text-align: center;"]) 
+
+        owed = ["0.0"]
+        if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
+            owed = [str(round(p.in_previous_rounds()[-1].debt * -17.5, 1))]
+        if boldRow:
+            owed = ["<b>"] + owed + ["</b>"]
+        if not player.participant.showColumns:
+           historyHTML.append(" display: none;")
+        historyHTML.extend(["'>", "".join(owed), "</td><td class='hidden' style='width: 60pt; text-align: center;"])
+
+        deviated = round(group_vars.turnViolations[p.id_in_group], 2)
+        if deviated > 1:
+            deviated = ["<span style='color: red; font-size: 0.8rem'>"] + [f"{deviated:.2f}"] + ["</span>"]
         else:
-            historyHTML.extend(["<td style='width: 60pt; text-align: center;'>", str(total_payoff), "</td>"])
+            deviated = [f"{deviated:.2f}"]    
+        if boldRow:
+            deviated = ["<b>"] + deviated + ["</b>"]
+        if not player.participant.showColumns:
+           historyHTML.append(" display: none;")
+        historyHTML.extend(["'>", "".join(deviated), "</td>"])
+
+        timeouts = sum([int(hist.timedOut) for hist in p.in_all_rounds()])
         if timeouts > 0:
-            if not summary and p.id_in_group == player.id_in_group:
-                historyHTML.extend(["<td style='width: 80pt; text-align: center;'><b><i>(", str(timeouts), " timeouts)</i></b></td>"])
+            if boldRow:
+                historyHTML.extend(["<td style='width: 80pt; text-align: center;'><i><b>(", str(timeouts), " timeouts)</b></i></td>"])
             else:
                 historyHTML.extend(["<td style='width: 80pt; text-align: center;'><i>(", str(timeouts), " timeouts)</i></td>"])    
         else:
             historyHTML.extend(["<td></td>"])
-        if not summary and player.advice != "":    
-            if p.id_in_group == player.id_in_group:
-                historyHTML.extend(["<td style='text-align: center;'><b>", p.advice, "</b></td>"])
+
+        if not summary and p.advice != "":    
+            if boldRow:
+                historyHTML.extend(["<td style='text-align: center;'><b>", p.advice, "</b></td>"])    
             else:
-                historyHTML.extend(["<td style='text-align: center;'>", p.advice, "</td>"])    
-        historyHTML.append("</tr>") 
+                historyHTML.extend(["<td style='text-align: center;'>", p.advice, "</td>"]) 
+
+        historyHTML.append("</tr>")
     historyHTML.append("</table>") 
     if summary:
         historyHTML.extend(["<br><div style='text-align: center;'>Social utility=<b>", str(sum(payoffs))])
@@ -285,10 +397,14 @@ class MADChairs(Page):
         player.secondsElapsed = time.time() - participant.time
         if "selected" in data and data["selected"] in playerOptions():
             player.selection = data["selected"]
+            participant.showColumns = data["showColumns"]
             player.timedOut = False
         elif "timeout" in data:
             player.timedOut = True
             player.selection = random_selection()
+        elif "showMore" in data:
+            player.soughtInfo = True
+            return {player.id_in_group: "show more"}
         return {player.id_in_group: "selection_made"}
     @staticmethod
     def is_displayed(player: Player):
@@ -428,7 +544,7 @@ def updateStrategies(players, group_vars):
     #turn-taking
     learners = [p for p in debt_sorted_players if group_vars.turnViolations[p] < 1] 
     turnTakers = [p for p in debt_sorted_players if p not in learners] + learners
-    free = [button for button in sorted_buttons if button[1] < players[0].round_number * 1.1] 
+    free = [button for button in sorted_buttons if button[1] < players[0].round_number * 1.4] 
     sorted_buttons = [button for button in sorted_buttons if button not in free] + free
     extra_buttons = [(sorted_buttons[0] if C.HIDE_SKIP else ('skip',))] * extra_players
     group_vars.turntaking = {id: (extra_buttons + sorted_buttons)[i][0] for i, id in enumerate(turnTakers)}

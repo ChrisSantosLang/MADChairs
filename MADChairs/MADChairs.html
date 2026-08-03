@@ -51,13 +51,15 @@ function skipClicked() {
     $('#check').show();
 }
 
-function toggleToolTip(event) {
+function boxClicked() {
     event.stopPropagation();
-    if ($('#tooltip').is(':visible')) {
-        $('#tooltip').hide();
-    } else {
-        $('#tooltip').show();
-    }
+}
+
+function readMore(event) {
+    event.stopPropagation();
+    $('.hidden').show();
+    $('#infolink').hide();
+    liveSend({'showMore': 'show more', 'round': js_vars.round});
     event.preventDefault();
 }
 
@@ -80,7 +82,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     }
     $('#confirm').on('click', function (event) {
-        liveSend({'selected': $('#selection').text(), 'round': js_vars.round});
+        showColumns = ($('#showColumns').length > 0 && $('#showColumns').is(':checked'))
+        liveSend({'selected': $('#selection').text(), 'round': js_vars.round, 'showColumns': showColumns});
         event.preventDefault();
     });
     $('#cancel').on('click', function (event) {
