@@ -59,7 +59,8 @@ In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `TIMER_DISPLAY_AT` (default `30`): Allow players to request extra time when this many seconds remain
 * `TIMER_INCREMENT` (default `30`): How many seconds to add when players request extra time
 * `QUESTION_ROUNDS` (default `(2,)`): The round(s) after which to ask users to describe their strategy
-* `QUESTION_TIMER` (default `120`): The time limit (in seconds) for describing one's strategy
+* `DEVIANCE_ROUNDS` (default `()`): The round(s) after which to ask users to explain their deviance from advice
+* `QUESTION_TIMER` (default `120`): The time limit (in seconds) for describing one's strategy or deviance
 
 ## Data
 Data can be exported in Excel format. Some special data columns of note:

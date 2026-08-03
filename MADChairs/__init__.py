@@ -15,6 +15,7 @@ class C(BaseConstants):
     BUTTONS = ('A', 'B', 'C', 'D')
     TIMER_DISPLAY_AT = 30
     QUESTION_ROUNDS = (2,)
+    DEVIANCE_ROUNDS = (20,)
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     ADVICE = {1:'{turntaking}', 21: None}
@@ -76,6 +77,7 @@ class Player(BasePlayer):
     strategy = models.LongStringField(label='Considering rounds 1 and 2, explain briefly the thoughts behind your choices:')
     advice = models.StringField(blank=True)
     soughtInfo = models.BooleanField(initial=False)
+    whyDeviate = models.LongStringField(label='Briefly explain why:')
 def makeMaxHistory(stored=None): 
     def inner():
         nonlocal stored
@@ -565,6 +567,22 @@ class Strategy(Page):
     @staticmethod
     def get_timeout_seconds(player: Player):
         return C.QUESTION_TIMER
+class Deviance(Page):
+    form_model = 'player'
+    form_fields = ['whyDeviate']
+    @staticmethod
+    def is_displayed(player: Player):
+        participant = player.participant
+        return player.round_number in C.DEVIANCE_ROUNDS and not participant.disconnected and participant.robot == ""
+    @staticmethod
+    def vars_for_template(player: Player):
+        return dict(
+            follow = len([p for p in player.in_all_rounds() if p.selection == p.advice]),
+            maxFollow = len([p for p in player.in_all_rounds() if p.advice != ""]),
+        )
+    @staticmethod
+    def get_timeout_seconds(player: Player):
+        return C.QUESTION_TIMER
 class Processing(Page):
     form_model = 'player'
     timeout_seconds = 0.1
@@ -585,4 +603,4 @@ class RobotResults(Page):
     @staticmethod
     def js_vars(player: Player): 
         return dict(historyHTML = historyHTML(player, summary=True))
-page_sequence = [MADChairsWaitPage, MADChairs, Strategy, Processing, RobotResults]
+page_sequence = [MADChairsWaitPage, MADChairs, Strategy, Deviance, Processing, RobotResults]
