@@ -19,49 +19,25 @@ class C(BaseConstants):
     QUESTION_TIMER = 120
     PRIZE = cu(0.25)
     ADVICE = {1:'{turntaking}', 21: None}
-    SORT_HISTORY = True
+    SORT_HISTORY = False
     HIDE_CHAT = True
     HIDE_SKIP = True
     ADVICE_INFO = ["""You are the only player advised to <b>click {advice}</b> for this round. It is your turn to benefit from a unique button.""",
-        """You are not advised to click a unique button this round. This is due to recent deviations from the advice. 
-    Following the advice can get you back to be advised unique buttons.""",
-        """You are not advised to click a unique button this round. This is to give others a turn at winning, 
-    but you will be assigned future turns if you follow the advice.""",
-        """The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
-    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
-    but it also decreases by 30% each round, so previous deviations become forgotten. 
-    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
-    so everyone would take turns winning if everyone followed the advice.<br><br>
-    We chose the advice algorithm for this study in the same way chess machines are developed: 
-    We ran tournaments between the best potential algorithms we could find. 
-    Players who followed the advice given in this study achieved the best outcomes for themselves. 
-    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
-    Deviation tends to harm both oneself and any other player with whom one collides.""",
-        """Your "owed" is {owed}. That is what you stand to collect by getting your "deviated" below 1. 
-    Your "deviated" is currently {deviated}, so you would need to lose {penalty} round(s) before
-    the advice will start assigning you what you are owed.<br><br>
-    The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
-    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
-    but it also decreases by 30% each round, so previous deviations become forgotten. 
-    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
-    so everyone would take turns winning if everyone followed the advice.<br><br>
-    We chose the advice algorithm for this study in the same way chess machines are developed: 
-    We ran tournaments between the best potential algorithms we could find. 
-    Players who followed the advice given in this study achieved the best outcomes for themselves. 
-    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
-    Deviation tends to harm both oneself and any other player with whom one collides """,
-        """Your "owed" is {owed}, which is not higher than other players, 
-    but it will go up and theirs will go down if you lose this round and they win.<br><br>
-    The advice algorithm assigns a collision to two players each round, selecting them for exceeding 1 on "deviated" and 
-    otherwise by least "owed". Your "deviated" statistic increases by 1 every time you do not follow the advice, 
-    but it also decreases by 30% each round, so previous deviations become forgotten. 
-    Your "owed" statistic indicates how much the other players owe you; it goes down when you lose and up when you win, 
-    so everyone would take turns winning if everyone followed the advice.<br><br>
-    We chose the advice algorithm for this study in the same way chess machines are developed: 
-    We ran tournaments between the best potential algorithms we could find. 
-    Players who followed the advice given in this study achieved the best outcomes for themselves. 
-    Participants in previous studies won about three times as often when they followed the advice compared to when they did not. 
-    Deviation tends to harm both oneself and any other player with whom one collides."""
+        """You recently deviated from the advice, so you are advised to <b>click {advice}</b> and lose this round. 
+    Following this advice can get you back to being advised unique buttons in the future.""",
+        """You are advised to <b>click {advice}</b> and lose this round. This is to give others a turn at winning.""",
+        """<b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
+    The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
+    so everyone would take turns if they followed the advice.""",
+        """You are "Owed" {owed}. That is what you stand to collect by decreasing your "Deviated" from {deviated} to below 1. 
+    You would need to lose the next {penalty} round(s) to achieve that.<br><br>
+    <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
+    The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
+    so everyone would take turns if they followed the advice.""",
+        """You are "Owed" {owed}, which is not yet more than other players.<br><br>
+    <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
+    The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
+    so everyone would take turns if they followed the advice."""
     ]
     KOLKATA_PAISE = False
 class Subsession(BaseSubsession):
@@ -78,6 +54,7 @@ class Player(BasePlayer):
     advice = models.StringField(blank=True)
     soughtInfo = models.BooleanField(initial=False)
     whyDeviate = models.LongStringField(label='Briefly explain why:')
+    turntaking = models.StringField(blank=True)
 def makeMaxHistory(stored=None): 
     def inner():
         nonlocal stored
@@ -258,7 +235,7 @@ def historyHTML(player, summary=False):
                     more = C.ADVICE_INFO[5].replace("{owed}", str(owed)).replace("{deviated}", f"{deviated:.2f}").replace("{penalty}", str(penalty))
         if len(more) > 0:
             historyHTML.extend([readMore, "</div><br><div class='hidden' style='display: none'><div>", more, "</div><br>"])
-            if player.participant.showColumns:
+            if player.participant.showColumns and player.advice != "":
                 historyHTML.extend("</div><input type='checkbox' id='showColumns' checked onclick='boxClicked()'> <label for='showColumns'>Always show Owed and Deviated</label><br><br>")
             else:
                 historyHTML.extend("<input type='checkbox' id='showColumns' onclick='boxClicked()'> <label for='showColumns'>Always show Owed and Deviated</label><br><br></div>")
@@ -274,7 +251,7 @@ def historyHTML(player, summary=False):
         for hist in history:
             historyHTML.extend(["</td><td style='text-align: center;'><b>", str(hist.round_number), "</b>"])
     historyHTML.extend(["</td><td style='width: 60pt; text-align: center;'><b>Bonus</b></td>"])
-    if player.participant.showColumns:
+    if player.participant.showColumns and player.advice != "":
         historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center;'><b>Owed</b></td>"])
         historyHTML.extend(["<td class='hidden' style='width: 60pt; text-align: center;'><b>Deviated</b></td><td></td>"])
     else:
@@ -328,7 +305,7 @@ def historyHTML(player, summary=False):
             owed = [str(round(p.in_previous_rounds()[-1].debt * -17.5, 1))]
         if boldRow:
             owed = ["<b>"] + owed + ["</b>"]
-        if not player.participant.showColumns:
+        if not player.participant.showColumns or player.advice == "":
            historyHTML.append(" display: none;")
         historyHTML.extend(["'>", "".join(owed), "</td><td class='hidden' style='width: 60pt; text-align: center;"])
 
@@ -339,7 +316,7 @@ def historyHTML(player, summary=False):
             deviated = [f"{deviated:.2f}"]    
         if boldRow:
             deviated = ["<b>"] + deviated + ["</b>"]
-        if not player.participant.showColumns:
+        if not player.participant.showColumns or player.advice == "":
            historyHTML.append(" display: none;")
         historyHTML.extend(["'>", "".join(deviated), "</td>"])
 
@@ -425,6 +402,7 @@ class MADChairs(Page):
             if player.field_maybe_none(advice) is None:
                 for p in players:
                     p.advice = advice(p) if C.ADVICE else ""
+                    p.turntaking = players[0].participant.turntaking[p.id_in_group]
             robots = set()
             for p in players:
                 if p.participant.robot != "":
