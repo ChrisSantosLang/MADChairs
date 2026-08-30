@@ -30,13 +30,7 @@ To specify different selections for different rounds, specify a sequence of sele
 
 All four of these strategies have been called "turn taking" because they all yield optimal results when no player ever deviates, but the differences between these kinds of turn taking become apparent under deviation. `"{rotate}"` is a very simple strategy, but it does nothing to penalize deviance, and any player assigned to lose would lose if they don't deviate, so the costs of their deviance are born entirely by the victims with whom they collide. If carelessness would be problematic, `"{rotate}"` fails to discourage it. Even though `"{equalize}"` immediately punishes deviance, it aims to equalize total outcomes, so all players share equally in the costs of deviance (ending-up the same as `"{radicaleq}"` in the long-run). They discourage carelessness to some extent (but to negligible degree when there are enough other players). Only the strategy we have officially named `"{turntaking}"` disproportionately penalizes deviance, bringing justice and stability when conflict is inevitable.
 
-The following tables were computed by running pairwise tournaments with five buttons (skip not hidden), 20 rounds, and three players from each of the two competing strategies. Each pair played 20 matches (10 in odd positions, 10 in even positions): 
-
-![Comparing norms by mixing equal populations](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/mixes.png?raw=true)
-
-For this analysis, we use the term "edge" to refer to the minimum bonus achieved by those playing the strategy less the minimum achieved by those playing the opposing strategy. Strategies with negative edge are unstable because it would be rational for their lowest-achieving practitioner to defect to the opposing strategy. `"{turntaking}"` is the only strategy in this group that never has negative edge. While it has no edge over `"{equalize}"`, it has edge over `"{rotate}"` with has edge over `"{equalize}"`.
-
-`"{turntaking}"`, like most of the strategies, achieve 83% of the maximum possible bonus when no other strategy is played. While waiting for other players to defect to their strategy, the average turn-taker achieves as good or higher bonus than non-turn-takers. However, the implementation of `"{turntaking}"`, `"{caste}"`, and `"{equalize}"` require accounting that may be impractical without the help of a computer. 
+See the [AI Tournaments repository](https://github.com/ChrisSantosLang/AiTournament/) for general comparison of strategies. 
 
 ## Game settings
 In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
