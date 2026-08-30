@@ -35,9 +35,6 @@ See the [AI Tournaments repository](https://github.com/ChrisSantosLang/AiTournam
 ## Game settings
 In `MADChairs/__init__.py`, it can be useful to adjust the following constants:
 * `KOLKATA_PAISE` (default `False`): To address concern that some real-world examples of scarce-resource division have external forces that limit waste (e.g., an employer resolves competition over a job by picking one winner), you can set `HIDE_SKIP = False` and `KOLKATA_PAISE = True`. That switches the game to the [Kolkata Paise Restaurant Problem](https://en.wikipedia.org/wiki/Kolkata_Paise_Restaurant_Problem), confirming that `"{turntaking}"` remains the grandmaster strategy even if each collision gets one winner.
-
-![3 vs 3 KPR tournament results, 20 matches/pairing](https://github.com/ChrisSantosLang/MADChairs/blob/main/Media/KPR.png?raw=true)
-
 * `NUM_ROUNDS` (default `20`): How many rounds to repeat the game
 * `BUTTONS` (default `('A', 'B', 'C', 'D')`: The button labels. This also determines the number and order of buttons
 * `SORT_HISTORY` (default `False`): Sorts the history like a leaderboard with the highest Bonus on top. 
