@@ -22,22 +22,22 @@ class C(BaseConstants):
     SORT_HISTORY = False
     HIDE_CHAT = True
     HIDE_SKIP = True
-    ADVICE_INFO = ["""You are the only player advised to <b>click {advice}</b> for this round. It is your turn to benefit from a unique button.""",
-        """You recently deviated from the advice, so you are advised to <b>click {advice}</b> and lose this round. 
-    Following this advice can get you back to being advised unique buttons in the future.""",
-        """You are advised to <b>click {advice}</b> and lose this round. This is to give others a turn at winning.""",
-        """<b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
+    ADVICE_INFO = ["""<i>You are the only player advised to <b>click {advice}</b> for this round. It is your turn to benefit from a unique button.</i>""",
+        """<i>You recently deviated from the advice, so you are advised to <b>click {advice}</b> and lose this round. 
+    Following this advice can get you back to being advised unique buttons in the future.</i>""",
+        """<i>You are advised to <b>click {advice}</b> and lose this round. This is to give others a turn at winning.</i>""",
+        """<i><b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
-    so everyone would take turns if they followed the advice.""",
-        """You are "Owed" {owed}. That is what you stand to collect by decreasing your "Deviated" from {deviated} to below 1. 
+    so everyone would take turns if they followed the advice.</i>""",
+        """<i>You are "Owed" {owed}. That is what you stand to collect by decreasing your "Deviated" from {deviated} to below 1. 
     You would need to lose the next {penalty} round(s) to achieve that.<br><br>
     <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
-    so everyone would take turns if they followed the advice.""",
-        """You are "Owed" {owed}, which is not yet more than other players.<br><br>
+    so everyone would take turns if they followed the advice.</i>""",
+        """<i>You are "Owed" {owed}, which is not yet more than other players.<br><br>
     <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
-    so everyone would take turns if they followed the advice."""
+    so everyone would take turns if they followed the advice.</i>"""
     ]
     KOLKATA_PAISE = False
 class Subsession(BaseSubsession):
@@ -225,7 +225,7 @@ def historyHTML(player, summary=False):
             owed = "0.0"
             if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
                 owed = round(player.in_previous_rounds()[-1].debt * -17.5, 1)
-            if group_vars.turnViolations[player.id_in_group] >= 1:
+            if group_vars.turnViolations[player.id_in_group] >= 1 and owed > 0:
                 historyHTML = ["<div>", C.ADVICE_INFO[1].replace("{advice}", player.advice)]
                 if len(C.ADVICE_INFO) > 4:
                     more = C.ADVICE_INFO[4].replace("{owed}", str(owed)).replace("{deviated}", f"{deviated:.2f}").replace("{penalty}", str(penalty))
