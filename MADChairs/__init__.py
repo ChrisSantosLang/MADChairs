@@ -29,7 +29,7 @@ class C(BaseConstants):
         """<i><b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
     so everyone would take turns if they followed the advice.</i>""",
-        """<i>You are "Owed" {owed}. That is what you stand to collect by decreasing your "Deviated" from {deviated} to below 1. 
+        """<i>You are "Owed" {owed}. That is what you stand to begin collecting by decreasing your "Deviated" from {deviated} to below 1. 
     You would need to lose the next {penalty} round(s) to achieve that.<br><br>
     <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
@@ -221,7 +221,7 @@ def historyHTML(player, summary=False):
                 more = C.ADVICE_INFO[3] 
         else:
             deviated = round(group_vars.turnViolations[player.id_in_group], 2)
-            penalty = max([p[0] for p in ((0, -1), (1, 1), (2, 1.42), (3, 2.04), (4, 2.92)) if deviated > p[1]])
+            penalty = max([p[0] for p in ((0, -1), (1, 1), (2, 1.42), (3, 2.04), (4, 2.92)) if deviated >= p[1]])
             owed = "0.0"
             if historyCap > 0 and len(players[0].in_previous_rounds()) > 0:
                 owed = round(player.in_previous_rounds()[-1].debt * -17.5, 1)
