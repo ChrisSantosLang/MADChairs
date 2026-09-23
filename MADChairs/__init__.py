@@ -29,8 +29,8 @@ class C(BaseConstants):
         """<i><b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
     so everyone would take turns if they followed the advice.</i>""",
-        """<i>You are "Owed" {owed}. That is what you stand to begin collecting by decreasing your "Deviated" from {deviated} to below 1. 
-    You would need to lose the next {penalty} round(s) to achieve that.<br><br>
+        """<i>Your “Deviated” is {deviated}. You would need to lose the next {penalty} round(s) to get your "Deviated" below 1. As long as your "Deviated" 
+    stays below 1, the advice algorithm will keep assigning you turns to win until what you are “Owed” ({owed}) is paid off.<br><br>
     <b>Reminder:</b> How much you are "Owed" decreases when you win; your "Deviated" statistic decreases when you follow the advice. 
     The advice algorithm assigns unique buttons to whichever players are owed the most and get their "Deviated" below 1, 
     so everyone would take turns if they followed the advice.</i>""",
